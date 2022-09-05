@@ -12,7 +12,7 @@ jobs:
           node-version: 18
       - name: Script
         working-directory: ./frontend
-        run:
+        run: |
           set -euxo pipefail
           npm install --global npx
           npm install
