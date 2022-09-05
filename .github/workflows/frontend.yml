@@ -14,7 +14,6 @@ jobs:
         working-directory: ./frontend
         run: |
           set -euxo pipefail
-          npm install --global npx
           npm install
           npx playwright install
 
