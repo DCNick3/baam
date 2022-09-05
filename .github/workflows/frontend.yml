@@ -11,15 +11,19 @@ jobs:
         with:
           node-version: 18
       - run: cd frontend
-      - run:
+      - name: Install dependencies
+        run:
           npm install --global npx
           npm install
           npx playwright install
-      - run: |
+      - name: Lint
+        run: |
           npm run lint
           npm run check
-      - run: npm run test
-      - run: npm run build
+      - name: Test
+        run: npm run test
+      - name: Build
+        run: npm run build
 
       # FIXME: deploy this shit instead of just pushing the artifacts
       - uses: actions/upload-artifact@v3
