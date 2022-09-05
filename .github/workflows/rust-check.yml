@@ -24,7 +24,6 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
-            components: minimal
             override: true
 
       - uses: actions-rs/clippy-check@v1
