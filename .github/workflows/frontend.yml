@@ -1,0 +1,28 @@
+on: push
+
+name: frontend
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: cd frontend
+      - run:
+          npm install --global npx
+          npm install
+          npx playwright install
+      - run: |
+          npm run lint
+          npm run check
+      - run: npm run test
+      - run: npm run build
+
+      # FIXME: deploy this shit instead of just pushing the artifacts
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend
+          path: frontend/.svelte-kit/output
