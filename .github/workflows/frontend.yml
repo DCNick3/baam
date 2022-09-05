@@ -10,19 +10,24 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: cd frontend
       - name: Install dependencies
+        working-directory: ./frontend
         run:
+          set -euxo pipefail
           npm install --global npx
           npm install
           npx playwright install
       - name: Lint
+        working-directory: ./frontend
         run: |
+          set -euxo pipefail
           npm run lint
           npm run check
       - name: Test
+        working-directory: ./frontend
         run: npm run test
       - name: Build
+        working-directory: ./frontend
         run: npm run build
 
       # FIXME: deploy this shit instead of just pushing the artifacts
