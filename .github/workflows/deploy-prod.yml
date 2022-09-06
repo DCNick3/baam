@@ -23,7 +23,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: 'dcnick3/baam:ref-${{ github.sha }}'
+          tags: 'ghcr.io/dcnick3/baam:ref-${{ github.sha }}'
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
