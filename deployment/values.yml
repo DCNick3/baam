@@ -1,0 +1,4 @@
+env: prod
+domain: baam.dcnick3.me
+dockerTag: latest
+pullPolicy: Always

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.env }}
+  namespace: baam
+spec:
+  selector:
+    matchLabels:
+      app: baam
+      env: {{ .Values.env }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: baam
+        env: {{ .Values.env }}
+    spec:
+      containers:
+      - name: baam
+        image: "ghcr.io/dcnick3/baam:{{ .Values.dockerTag }}"
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 8080
+

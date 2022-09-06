@@ -9,6 +9,7 @@ RUN --mount=type=cache,target=/root/.cargo/registry --mount=type=cache,target=/v
 
 FROM gcr.io/distroless/static
 
+LABEL org.opencontainers.image.source https://github.com/DCNick3/baam
 EXPOSE 8080
 
 COPY --from=build /volume/baam /baam
