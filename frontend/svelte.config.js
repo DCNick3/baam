@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-node'; // FIXME: use appropriate adapter (e.g. static if not using SSR)
+import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
 
 /** @type {import('@sveltejs/kit').Config} */
