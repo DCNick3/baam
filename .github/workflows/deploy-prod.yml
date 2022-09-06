@@ -22,6 +22,7 @@ jobs:
           release: 'prod'
           namespace: 'baam'
           chart: 'deployment'
+          helm: 'helm3'
           token: '${{ github.token }}'
           values: |
             env: prod
