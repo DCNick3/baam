@@ -25,7 +25,9 @@ jobs:
           helm: 'helm3'
           token: '${{ github.token }}'
           values: |
+            domain: baam.dcnick3.me
             env: prod
-          value-files: "[\"values.yml\", \"values.prod.yml\"]"
+            dockerTag: latest
+            pullPolicy: Always
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
