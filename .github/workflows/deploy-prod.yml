@@ -24,6 +24,8 @@ jobs:
         with:
           push: true
           tags: 'dcnick3/baam:ref-${{ github.sha }}'
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: 'Deploy'
         uses: 'glopezep/helm@v1.7.1'
