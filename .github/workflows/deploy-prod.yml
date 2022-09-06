@@ -26,6 +26,6 @@ jobs:
           token: '${{ github.token }}'
           values: |
             env: prod
-          value-files: "[\"deployment/values.yml\", \"deployment/values.prod.yml\"]"
+          value-files: "[\"values.yml\", \"values.prod.yml\"]"
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
