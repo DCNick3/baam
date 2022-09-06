@@ -3,7 +3,9 @@ on:
     branches:
       - master
 
-name: Rust checks
+name: Deploy to prod
+
+# TODO: build container
 
 jobs:
   deploy:
@@ -15,7 +17,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: 'Deploy'
-        uses: 'deliverybot/helm@v1'
+        uses: 'glopezep/helm@v1.7.1'
         with:
           release: 'prod'
           namespace: 'baam'
