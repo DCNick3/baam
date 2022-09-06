@@ -1,0 +1,27 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Rust checks
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://baam.dcnick3.me
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: 'Deploy'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: 'prod'
+          namespace: 'baam'
+          chart: 'deployment'
+          token: '${{ github.token }}'
+          values: |
+            env: prod
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
