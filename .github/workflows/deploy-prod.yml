@@ -16,6 +16,15 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: 'Build container'
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: 'dcnick3/baam:ref-${{ github.sha }}'
+
       - name: 'Deploy'
         uses: 'glopezep/helm@v1.7.1'
         with:
@@ -27,7 +36,7 @@ jobs:
           values: |
             domain: baam.dcnick3.me
             env: prod
-            dockerTag: latest
+            dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
