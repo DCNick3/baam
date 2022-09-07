@@ -86,7 +86,8 @@ jobs:
             env: pr-${{ github.event.pull_request.number }}
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
-        env:          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
   destroy-pr:
     if: github.event_name == 'pull_request' && (github.action == 'closed')
