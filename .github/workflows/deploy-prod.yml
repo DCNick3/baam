@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+  pull_request
 
 name: Deploy to prod
 
@@ -15,6 +16,11 @@ jobs:
       url: https://baam.dcnick3.me
     steps:
       - uses: actions/checkout@v1
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -34,7 +40,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: 'Deploy'
+      - if: steps.extract_branch.outputs.branch == 'master'
+        name: 'Deploy'
         uses: 'glopezep/helm@v1.7.1'
         with:
           release: 'prod'
@@ -45,6 +52,23 @@ jobs:
           values: |
             domain: baam.dcnick3.me
             env: prod
+            dockerTag: ref-${{ github.sha }}
+            pullPolicy: Always
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+
+      - if: steps.extract_branch.outputs.branch == 'master'
+        name: 'Deploy'
+        uses: 'glopezep/helm@v1.7.1'
+        with:
+          release: 'br-${{steps.extract_branch.outputs.branch}}'
+          namespace: 'baam'
+          chart: 'deployment'
+          helm: 'helm3'
+          token: '${{ github.token }}'
+          values: |
+            domain: baam.dcnick3.me
+            env: br-${{steps.extract_branch.outputs.branch}}
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
         env:
