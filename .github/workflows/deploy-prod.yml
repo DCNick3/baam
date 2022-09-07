@@ -116,7 +116,8 @@ jobs:
             env: pr-${{ github.event.pull_request.number }}
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
-        env:          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
       - uses: strumwolf/delete-deployment-environment@v2
         with:
