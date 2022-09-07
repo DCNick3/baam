@@ -37,8 +37,8 @@ jobs:
         with:
           push: true
           tags: 'ghcr.io/dcnick3/baam:ref-${{ github.sha }}'
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/dcnick3/baam:buildcache
+          cache-to: type=registry,ref=ghcr.io/dcnick3/baam:buildcache,mode=max
 
       - if: steps.extract_branch.outputs.branch == 'master'
         name: 'Deploy'
