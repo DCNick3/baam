@@ -57,7 +57,7 @@ jobs:
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
-      - if: steps.extract_branch.outputs.branch == 'master'
+      - if: steps.extract_branch.outputs.branch != 'master'
         name: 'Deploy'
         uses: 'glopezep/helm@v1.7.1'
         with:
