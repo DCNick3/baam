@@ -48,11 +48,11 @@ jobs:
       - name: 'Deploy to prod'
         uses: 'glopezep/helm@v1.7.1'
         with:
-          release: 'prod'
-          namespace: 'baam'
-          chart: 'deployment'
-          helm: 'helm3'
-          token: '${{ github.token }}'
+          release: prod
+          namespace: baam
+          chart: deployment
+          helm: helm3
+          token: ${{ github.token }}
           values: |
             domain: baam.dcnick3.me
             env: prod
@@ -69,11 +69,11 @@ jobs:
       - name: 'Deploy a pr'
         uses: 'glopezep/helm@v1.7.1'
         with:
-          release: pr-${ github.event.pull_request.number }}
-          namespace: 'baam'
-          chart: 'deployment'
-          helm: 'helm3'
-          token: '${{ github.token }}'
+          release: pr-${{ github.event.pull_request.number }}
+          namespace: baam
+          chart: deployment
+          helm: helm3
+          token: ${{ github.token }}
           values: |
             domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
             env: pr-${{ github.event.pull_request.number }}
