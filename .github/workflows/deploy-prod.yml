@@ -64,6 +64,7 @@ jobs:
   deploy-pr:
     if: github.event_name == 'pull_request'
     needs: build
+    runs-on: ubuntu-latest
     steps:
       - name: 'Deploy a pr'
         uses: 'glopezep/helm@v1.7.1'
