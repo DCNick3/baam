@@ -4,16 +4,13 @@ on:
       - master
   pull_request:
 
-name: Deploy to prod
+name: Deploy
 
 # TODO: build container
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: prod
-      url: https://baam.dcnick3.me
     steps:
       - uses: actions/checkout@v1
 
@@ -40,8 +37,15 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/dcnick3/baam:buildcache
           cache-to: type=registry,ref=ghcr.io/dcnick3/baam:buildcache,mode=max
 
-      - if: steps.extract_branch.outputs.branch == 'master'
-        name: 'Deploy'
+  deploy-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://baam.dcnick3.me
+    steps:
+      - name: 'Deploy to prod'
         uses: 'glopezep/helm@v1.7.1'
         with:
           release: 'prod'
@@ -57,19 +61,23 @@ jobs:
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
-      - if: steps.extract_branch.outputs.branch != 'master'
-        name: 'Deploy'
-        uses: 'glopezep/helm@v1.7.1'
-        with:
-          release: 'br-${{steps.extract_branch.outputs.branch}}'
-          namespace: 'baam'
-          chart: 'deployment'
-          helm: 'helm3'
-          token: '${{ github.token }}'
-          values: |
-            domain: baam.dcnick3.me
-            env: br-${{steps.extract_branch.outputs.branch}}
-            dockerTag: ref-${{ github.sha }}
-            pullPolicy: Always
-        env:
-          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+  #deploy-pr:
+  #  if: github.event_name == 'pull_request'
+  #  needs: build
+  #  steps:
+  #    - name: 'Deploy a pr'
+  #      uses: 'glopezep/helm@v1.7.1'
+  #      with:
+  #        release: 'prod'
+  #        namespace: 'baam'
+  #        chart: 'deployment'
+  #        helm: 'helm3'
+  #        token: '${{ github.token }}'
+  #        values: |
+  #          domain: baam.dcnick3.me
+  #          env: prod
+  #          dockerTag: ref-${{ github.sha }}
+  #          pullPolicy: Always
+  #      env:
+  #        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+
