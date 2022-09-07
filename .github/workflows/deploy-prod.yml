@@ -12,8 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
@@ -45,6 +43,8 @@ jobs:
       name: prod
       url: https://baam.dcnick3.me
     steps:
+      - uses: actions/checkout@v1
+
       - name: 'Deploy to prod'
         uses: 'glopezep/helm@v1.7.1'
         with:
