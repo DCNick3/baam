@@ -63,7 +63,7 @@ jobs:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
   deploy-pr:
-    if: github.event_name == 'pull_request' && (github.action == 'opened' || github.action == 'synchronize')
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
     needs: build
     runs-on: ubuntu-latest
     concurrency: pr-${{ github.event.pull_request.number }}
@@ -90,7 +90,7 @@ jobs:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
   destroy-pr:
-    if: github.event_name == 'pull_request' && (github.action == 'closed')
+    if: github.event_name == 'pull_request' && (github.event.action == 'closed')
     needs: build
     runs-on: ubuntu-latest
     concurrency: pr-${{ github.event.pull_request.number }}
