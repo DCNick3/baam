@@ -16,12 +16,6 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
-
-
-
-
-
     println!("Starting server on 0.0.0.0:8080");
     HttpServer::new(|| {
         App::new()
