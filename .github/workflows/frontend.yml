@@ -43,10 +43,3 @@ jobs:
           npm run check
 
           npm run test
-          npm run build
-
-      # FIXME: deploy this shit instead of just pushing the artifacts
-      - uses: actions/upload-artifact@v3
-        with:
-          name: frontend
-          path: frontend/build
