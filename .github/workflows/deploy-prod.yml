@@ -132,5 +132,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: pr-${{ github.event.pull_request.number }}
-          onlyDeactivateDeployments: true
 
