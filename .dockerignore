@@ -2,3 +2,5 @@ target
 .github
 frontend/node_modules
 Dockerfile
+deployment
+README.md
