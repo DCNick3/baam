@@ -105,9 +105,6 @@ jobs:
 
     permissions:
       deployments: write
-    environment:
-      name: pr-${{ github.event.pull_request.number }}
-      url: https://pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
     steps:
       - uses: actions/checkout@v1
 
