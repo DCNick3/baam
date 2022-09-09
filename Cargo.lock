@@ -345,6 +345,7 @@ dependencies = [
  "actix-web-static-files",
  "anyhow",
  "awc",
+ "change-detection",
  "static-files",
  "tracing",
  "url",

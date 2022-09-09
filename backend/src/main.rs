@@ -3,12 +3,11 @@ mod config;
 
 use actix_web::{web, App, HttpServer};
 use anyhow::{Context, Result};
-use url::Url;
 
 async fn main_impl() -> Result<()> {
     let config = config::Config {
         frontend: baam_frontend::Config {
-            upstream: None, //Some(Url::parse("http://localhost:5173").unwrap()),
+            upstream: None, //Some(url::Url::parse("http://localhost:5173").unwrap()),
         },
     };
 
