@@ -1,29 +1,35 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+mod api;
+mod config;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world! (this is a stub 6)")
-}
+use actix_web::{web, App, HttpServer};
+use anyhow::{Context, Result};
+use url::Url;
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
+async fn main_impl() -> Result<()> {
+    let config = config::Config {
+        frontend: baam_frontend::Config {
+            upstream: None, //Some(Url::parse("http://localhost:5173").unwrap()),
+        },
+    };
 
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
+    let api = api::configure().context("Configuring api")?;
+    let frontend = baam_frontend::configure(config.frontend).context("Configuring frontend")?;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
     println!("Starting server on 0.0.0.0:8080");
-    HttpServer::new(|| {
+
+    HttpServer::new(move || {
         App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+            .service(web::scope("/api/").configure(api.clone()))
+            .configure(frontend.clone())
     })
     .bind(("0.0.0.0", 8080))?
     .run()
-    .await
+    .await?;
+
+    Ok(())
+}
+
+#[actix_web::main]
+async fn main() {
+    main_impl().await.unwrap();
 }

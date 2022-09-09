@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "backend"
+    "backend",
+    "frontend",
 ]
 
 [profile.ship]
