@@ -12,7 +12,6 @@ jobs:
             toolchain: stable
             components: rustfmt
             override: true
-      - uses: Swatinem/rust-cache@v2
 
       - uses: mbrobbel/rustfmt-check@master
         with:
