@@ -69,7 +69,7 @@ async fn main_impl() -> Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
-            .service(web::scope("/api/").configure(api.clone()))
+            .service(web::scope("/api").configure(api.clone()))
             .configure(frontend.clone())
     })
     .bind(config.server.endpoint)?

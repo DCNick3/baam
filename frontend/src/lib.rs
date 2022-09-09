@@ -1,5 +1,5 @@
 use actix_web::error::ErrorBadGateway;
-use actix_web::web::{Data, ServiceConfig};
+use actix_web::web::ServiceConfig;
 use actix_web::{web, HttpRequest, HttpResponse, HttpResponseBuilder, Result};
 use actix_web_static_files::ResourceFiles;
 use awc::http::uri::Uri;
@@ -46,7 +46,7 @@ pub fn configure(config: Config) -> anyhow::Result<impl Fn(&mut ServiceConfig) +
             // if we have an upstream frontend server configured - proxy connections to it
             info!("Will serve frontend from {}", upstream);
             let client = awc::Client::new();
-            cfg.app_data(Data::new(StaticData {
+            cfg.app_data(web::Data::new(StaticData {
                 client,
                 upstream_url: upstream.clone(),
             }))
