@@ -6,4 +6,4 @@ members = [
 [profile.ship]
 inherits = "release"
 debug = 0
-lto = 'fat'
+lto = 'thin'

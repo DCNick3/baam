@@ -10,11 +10,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM chef AS build
 COPY --from=planner /volume/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
-RUN --mount=type=cache,target=/root/.cargo/registry --mount=type=cache,target=/volume/target \
+RUN \
     cargo chef cook --profile ship --target x86_64-unknown-linux-musl --recipe-path recipe.json
 # Build application
 COPY . .
-RUN --mount=type=cache,target=/root/.cargo/registry --mount=type=cache,target=/volume/target \
+RUN \
     cargo b --profile ship --target x86_64-unknown-linux-musl && \
     cp target/x86_64-unknown-linux-musl/ship/baam baam
 
