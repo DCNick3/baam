@@ -39,6 +39,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
+    concurrency: prod
     environment:
       name: prod
       url: https://baam.dcnick3.me
@@ -48,11 +49,11 @@ jobs:
       - name: 'Deploy to prod'
         uses: 'glopezep/helm@v1.7.1'
         with:
-          release: 'prod'
-          namespace: 'baam'
-          chart: 'deployment'
-          helm: 'helm3'
-          token: '${{ github.token }}'
+          release: prod
+          namespace: baam
+          chart: deployment
+          helm: helm3
+          token: ${{ github.token }}
           values: |
             domain: baam.dcnick3.me
             env: prod
@@ -61,23 +62,67 @@ jobs:
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
-  #deploy-pr:
-  #  if: github.event_name == 'pull_request'
-  #  needs: build
-  #  steps:
-  #    - name: 'Deploy a pr'
-  #      uses: 'glopezep/helm@v1.7.1'
-  #      with:
-  #        release: 'prod'
-  #        namespace: 'baam'
-  #        chart: 'deployment'
-  #        helm: 'helm3'
-  #        token: '${{ github.token }}'
-  #        values: |
-  #          domain: baam.dcnick3.me
-  #          env: prod
-  #          dockerTag: ref-${{ github.sha }}
-  #          pullPolicy: Always
-  #      env:
-  #        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+  deploy-pr:
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened')
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: pr-${{ github.event.pull_request.number }}
+    environment:
+      name: pr-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: 'Deploy a pr'
+        uses: 'glopezep/helm@v1.7.1'
+        with:
+          release: pr-${{ github.event.pull_request.number }}
+          namespace: baam
+          chart: deployment
+          helm: helm3
+          token: ${{ github.token }}
+          values: |
+            domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
+            env: pr-${{ github.event.pull_request.number }}
+            dockerTag: ref-${{ github.sha }}
+            pullPolicy: Always
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+
+  destroy-pr:
+    if: github.event_name == 'pull_request' && (github.event.action == 'closed')
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: pr-${{ github.event.pull_request.number }}
+
+    permissions:
+      deployments: write
+    environment:
+      name: pr-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: 'Destroy a pr'
+        uses: 'glopezep/helm@v1.7.1'
+        with:
+          release: pr-${{ github.event.pull_request.number }}
+          namespace: baam
+          chart: deployment
+          helm: helm3
+          token: ${{ github.token }}
+          task: remove
+          values: |
+            domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
+            env: pr-${{ github.event.pull_request.number }}
+            dockerTag: ref-${{ github.sha }}
+            pullPolicy: Always
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+
+      - uses: strumwolf/delete-deployment-environment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: pr-${{ github.event.pull_request.number }}
+          onlyDeactivateDeployments: true
 
