@@ -39,7 +39,10 @@ FROM gcr.io/distroless/static
 LABEL org.opencontainers.image.source https://github.com/DCNick3/baam
 EXPOSE 8080
 
+ENV ENVIRONMENT=prod
+
 COPY --from=build /volume/baam /baam
+COPY config.yml config.prod.yml /
 
 CMD ["/baam"]
 

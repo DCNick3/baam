@@ -11,3 +11,5 @@ baam-frontend = { path = "../frontend" }
 actix-web = "4.1.0"
 anyhow = "1.0.64"
 url = "2.3.1"
+serde = "1.0.144"
+config = "0.13.2"
