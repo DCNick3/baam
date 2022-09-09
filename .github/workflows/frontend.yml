@@ -1,0 +1,52 @@
+on: push
+
+name: frontend
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache node_modules
+        id: node_modules_cache
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node_modules
+      - name: Cache ms-playwright
+        id: playwright_cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright
+
+      - name: Node packages
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Playwright browser
+        if: steps.playwright_cache.outputs.cache-hit != 'true'
+        working-directory: ./frontend
+        run: npx playwright install
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Script
+        working-directory: ./frontend
+        run: |
+          set -euxo pipefail
+
+          npm run lint
+          npm run check
+
+          npm run test
+          npm run build
+
+      # FIXME: deploy this shit instead of just pushing the artifacts
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend
+          path: frontend/build
