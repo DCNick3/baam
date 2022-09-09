@@ -8,6 +8,7 @@ use opentelemetry_otlp::{HasExportConfig, WithExportConfig};
 use std::io::ErrorKind;
 use std::time::Duration;
 use tracing_actix_web::TracingLogger;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Registry;
@@ -45,7 +46,11 @@ fn init_tracing() -> Result<()> {
 
     Registry::default()
         .with(tracing_subscriber::EnvFilter::new("INFO"))
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::Layer::new()
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .event_format(tracing_subscriber::fmt::format::Format::default().compact()),
+        )
         .with(tracing_opentelemetry::layer().with_tracer(tracer))
         .init();
 
