@@ -15,7 +15,7 @@ spec:
         app: baam
         env: {{ .Values.env }}
       annotations:
-        instrumentation.opentelemetry.io/inject-sdk: true
+        instrumentation.opentelemetry.io/inject-sdk: "true"
     spec:
       containers:
       - name: baam
