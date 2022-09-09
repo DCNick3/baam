@@ -3,12 +3,14 @@ use actix_web::web::{Data, ServiceConfig};
 use actix_web::{web, HttpRequest, HttpResponse, HttpResponseBuilder, Result};
 use actix_web_static_files::ResourceFiles;
 use awc::http::uri::Uri;
+use serde::Deserialize;
 use std::str::FromStr;
 use tracing::info;
 use url::Url;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
+#[derive(Deserialize)]
 pub struct Config {
     pub upstream: Option<Url>,
 }

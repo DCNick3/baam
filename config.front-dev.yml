@@ -1,0 +1,4 @@
+frontend:
+  upstream: "http://localhost:5173/"
+server:
+  endpoint: "127.0.0.1:8080"
