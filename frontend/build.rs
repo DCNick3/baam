@@ -1,5 +1,6 @@
-use static_files::NpmBuild;
-use std::path::PathBuf;
+use static_files::{resource_dir, NpmBuild};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 const PACKAGE_JSON_DIR: &str = ".";
 const TARGET_DIR: &str = "build";
@@ -30,13 +31,31 @@ fn change_detection() {
     }
 }
 
-fn main() -> std::io::Result<()> {
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
+    fs::create_dir_all(&dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
+}
+
+fn main() -> io::Result<()> {
+    let out_dir = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    let target_dir = out_dir.join(TARGET_DIR);
+
+    NpmBuild::new(PACKAGE_JSON_DIR).install()?.run("build")?;
+
+    copy_dir_all(TARGET_DIR, &target_dir)?;
+
+    resource_dir(&target_dir).build()?;
+
     change_detection();
 
-    NpmBuild::new(PACKAGE_JSON_DIR)
-        .install()?
-        .run("build")?
-        .target(TARGET_DIR)
-        .to_resource_dir()
-        .build()
+    Ok(())
 }
