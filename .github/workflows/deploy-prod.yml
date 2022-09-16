@@ -66,7 +66,8 @@ jobs:
           values: |
             domain: baam.dcnick3.me
             dockerTag: ref-${{ github.sha }}
-            pullPolicy: Always
+          valuesFiles: |
+            deployment/values.yml
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
@@ -92,7 +93,8 @@ jobs:
           values: |
             domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
             dockerTag: ref-${{ github.sha }}
-            pullPolicy: Always
+          valuesFiles: |
+            deployment/values.yml
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
@@ -118,7 +120,8 @@ jobs:
           values: |
             domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
             dockerTag: ref-${{ github.sha }}
-            pullPolicy: Always
+          valuesFiles: |
+            deployment/values.yml
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
 
@@ -127,4 +130,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: pr-${{ github.event.pull_request.number }}
           onlyRemoveDeployments: true
-
