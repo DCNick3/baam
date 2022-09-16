@@ -35,6 +35,5 @@ spec:
           - name: "DATABASE_PASSWORD"
             valueFrom:
               secretKeyRef:
-                key: postgres-password
+                key: password
                 name: {{ (include "baam.databaseSecretName" .) }}
-
