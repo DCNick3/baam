@@ -1,4 +1,5 @@
 pub mod models;
+#[rustfmt::skip]
 mod schema;
 
 use actix::prelude::*;

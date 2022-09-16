@@ -1,5 +1,6 @@
 // linking order workaround
 extern crate openssl;
+#[allow(unused_imports)]
 #[macro_use]
 extern crate diesel;
 
