@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.env }}-ingress
-  namespace: baam
+  name: {{ .Release.Name }}-ingress
+  namespace: {{ .Release.Namespace }}
   annotations:
     kubernetes.io/ingress.class: "traefik"
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -15,10 +15,10 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ .Values.env }}
+            name: {{ .Release.Name }}
             port:
               number: 80
   tls:
   - hosts:
     - {{ .Values.domain }}
-    secretName: {{ .Values.env }}-ingress-secret
+    secretName: {{ .Release.Name }}-ingress-secret

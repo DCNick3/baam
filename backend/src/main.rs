@@ -1,5 +1,9 @@
 mod api;
 mod config;
+mod db;
+mod error;
+
+use actix::SyncArbiter;
 use actix_web::{web, App, HttpServer};
 use anyhow::{Context, Result};
 use opentelemetry::sdk::resource::{EnvResourceDetector, SdkProvidedResourceDetector};
@@ -57,6 +61,26 @@ fn init_tracing() -> Result<()> {
     Ok(())
 }
 
+fn get_database_url() -> String {
+    if let Ok(v) = std::env::var("DATABASE_URL") {
+        v
+    } else {
+        let (host, port, name, user, password) = (|| -> Result<_> {
+            use std::env::var;
+            Ok((
+                var("DATABASE_HOST")?,
+                var("DATABASE_PORT")?,
+                var("DATABASE_NAME")?,
+                var("DATABASE_USER")?,
+                var("DATABASE_PASSWORD")?,
+            ))
+        })().expect("Please set DATABASE_URL to a valid postgres URI (for example postgres://user:password@hostname:5432/database_name)\n\
+Alternatively you can set DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD variables");
+
+        format!("postgres://{user}:{password}@{host}:{port}/{name}")
+    }
+}
+
 async fn main_impl() -> Result<()> {
     init_tracing().context("Initializing tracing")?;
 
@@ -64,8 +88,12 @@ async fn main_impl() -> Result<()> {
         "Please set ENVIRONMENT env var (probably you want to use either 'prod' or 'dev')",
     )?;
 
+    let database_url = get_database_url();
+
     let config = config::Config::load(&environment).context("Loading config")?;
 
+    let database = db::DbExecutor::new(&database_url).context("Connecting to the database")?;
+    let database = SyncArbiter::start(3, move || database.clone());
     let api = api::configure().context("Configuring api")?;
     let frontend = baam_frontend::configure(config.frontend).context("Configuring frontend")?;
 
@@ -74,6 +102,7 @@ async fn main_impl() -> Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger::default())
+            .app_data(web::Data::new(database.clone()))
             .service(web::scope("/api").configure(api.clone()))
             .configure(frontend.clone())
     })

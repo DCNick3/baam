@@ -1,4 +1,13 @@
-env: prod
 domain: baam.dcnick3.me
 dockerTag: latest
 pullPolicy: Always
+
+
+
+postgresql:
+  architecture: standalone
+  auth:
+    username: baam
+    database: baam
+    existingSecret: postgresql-secret
+

@@ -2,7 +2,6 @@
 name = "baam"
 version = "0.1.0"
 edition = "2021"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -10,12 +9,16 @@ baam-frontend = { path = "../frontend" }
 
 actix-web = "4.1.0"
 anyhow = "1.0.64"
-url = "2.3.1"
-serde = "1.0.144"
 config = "0.13.2"
-tracing = "0.1.36"
-tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
-tracing-actix-web = { version = "0.6.0", features = ["opentelemetry_0_17"] }
-tracing-opentelemetry = "0.17.4"
+diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
 opentelemetry = { version = "0.17.0", features = ["rt-tokio"] }
 opentelemetry-otlp = "0.10.0"
+serde = "1.0.144"
+tracing = "0.1.36"
+tracing-actix-web = { version = "0.6.0", features = ["opentelemetry_0_17"] }
+tracing-opentelemetry = "0.17.4"
+tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
+url = "2.3.1"
+r2d2 = "0.8.10"
+actix = "0.13.0"
+chrono = { version = "0.4.22", features = ["serde"] }

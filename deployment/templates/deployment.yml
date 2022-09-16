@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.env }}
-  namespace: baam
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
       app: baam
-      env: {{ .Values.env }}
+      env: {{ .Release.Name }}
   replicas: 1
   template:
     metadata:
       labels:
         app: baam
-        env: {{ .Values.env }}
+        env: {{ .Release.Name }}
       annotations:
         instrumentation.opentelemetry.io/inject-sdk: "true"
     spec:
@@ -23,4 +23,18 @@ spec:
         imagePullPolicy: {{ .Values.pullPolicy }}
         ports:
         - containerPort: 8080
+        env:
+          - name: "DATABASE_HOST"
+            value: {{ (include "baam.databaseHost" .) | quote }}
+          - name: "DATABASE_PORT"
+            value: {{ (include "baam.databasePort" .) | quote }}
+          - name: "DATABASE_NAME"
+            value: {{ (include "baam.databaseName" .) | quote }}
+          - name: "DATABASE_USER"
+            value: {{ (include "baam.databaseUser" .) | quote }}
+          - name: "DATABASE_PASSWORD"
+            valueFrom:
+              secretKeyRef:
+                key: postgres-password
+                name: {{ (include "baam.databaseSecretName" .) }}
 

@@ -65,7 +65,6 @@ jobs:
           token: ${{ github.token }}
           values: |
             domain: baam.dcnick3.me
-            env: prod
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
         env:
@@ -92,7 +91,6 @@ jobs:
           token: ${{ github.token }}
           values: |
             domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
-            env: pr-${{ github.event.pull_request.number }}
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
         env:
@@ -119,7 +117,6 @@ jobs:
           task: remove
           values: |
             domain: pr-${{ github.event.pull_request.number }}.baam.dcnick3.me
-            env: pr-${{ github.event.pull_request.number }}
             dockerTag: ref-${{ github.sha }}
             pullPolicy: Always
         env:
