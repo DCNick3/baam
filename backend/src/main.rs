@@ -1,3 +1,8 @@
+// linking order workaround
+extern crate openssl;
+#[macro_use]
+extern crate diesel;
+
 mod api;
 mod config;
 mod db;
