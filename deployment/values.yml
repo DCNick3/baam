@@ -10,4 +10,4 @@ postgresql:
     existingSecret: postgresql-secret
   primary:
     persistence:
-      size: 256MiB
+      size: 256M
