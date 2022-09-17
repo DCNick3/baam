@@ -23,8 +23,8 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
-        email -> Text,
-        claims -> Jsonb,
+        username -> Text,
+        name -> Text,
     }
 }
 

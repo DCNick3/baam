@@ -8,4 +8,6 @@ postgresql:
     username: baam
     database: baam
     existingSecret: postgresql-secret
-
+  primary:
+    persistence:
+      size: 256MiB

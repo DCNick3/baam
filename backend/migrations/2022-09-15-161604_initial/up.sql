@@ -1,8 +1,11 @@
 CREATE TABLE users
 (
     id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL,
-    claims JSONB NOT NULL
+    -- name used to log in, designed to be machine-readable
+    username TEXT NOT NULL UNIQUE,
+    -- name that can be used to display to the user, smth like "John Doe"
+    -- probably we can allow the user to change it
+    name TEXT NOT NULL
 );
 
 CREATE TABLE sessions

@@ -1,7 +1,11 @@
 mod models;
+mod sso;
 
-use crate::db::{DbData, GetSessions};
+use crate::api::models::LoginRequest;
+use crate::db::models as db_models;
+use crate::db::{DbData, GetOrCreateUser, GetSessions};
 use crate::error::ResponseResult;
+use actix_web::http::StatusCode;
 use actix_web::{get, post, web, web::ServiceConfig, HttpResponse, Responder};
 use anyhow::{anyhow, Result};
 
@@ -32,12 +36,34 @@ async fn error() -> ResponseResult<web::Bytes> {
     Err(anyhow!("Example error").into())
 }
 
+#[post("/login")]
+async fn login(db: DbData, body: web::Json<LoginRequest>) -> ResponseResult<HttpResponse> {
+    let body = body.into_inner();
+
+    let user: db_models::User = db
+        .send(GetOrCreateUser {
+            username: body.username,
+            name: body.name,
+        })
+        .await??;
+
+    Ok(HttpResponse::build(StatusCode::OK)
+        // .cookie(
+        //     Cookie::build("user_id", user.id.0.to_string())
+        //         .path("/")
+        //         .http_only(true)
+        //         .finish(),
+        // )
+        .body(format!("{:#?}", user)))
+}
+
 pub fn configure() -> Result<impl Fn(&mut ServiceConfig) + Clone> {
     Ok(|cfg: &mut ServiceConfig| {
         cfg.service(hello)
             .service(ping)
             .service(echo)
             .service(get_sessions)
-            .service(error);
+            .service(error)
+            .service(login);
     })
 }

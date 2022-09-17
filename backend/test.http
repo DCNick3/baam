@@ -1,0 +1,7 @@
+POST {{base_url}}/api/login
+Content-Type: application/json
+
+{
+  "username": "nikita",
+  "name": "DCNick3"
+}
