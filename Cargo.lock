@@ -104,32 +104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix-jwt-auth-middleware"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24b03dc215cdf2e2567e859d162ed09db8ef35f43cb95074cccc3269f72c38c6"
-dependencies = [
- "actix-jwt-auth-middleware-derive",
- "actix-web",
- "ed25519-dalek",
- "futures-util",
- "jwt-compact",
- "rand 0.7.3",
- "serde",
- "serde_cbor",
-]
-
-[[package]]
-name = "actix-jwt-auth-middleware-derive"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692b7dc2db6af15cfd42d38cd8f8aebc26867a1661048a1c5e3c87ef801ebad5"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "actix-macros"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -443,7 +417,6 @@ version = "0.1.0"
 dependencies = [
  "actix",
  "actix-http",
- "actix-jwt-auth-middleware",
  "actix-web",
  "anyhow",
  "baam-frontend",
@@ -1049,12 +1022,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "half"
-version = "1.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
-
-[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1266,7 +1233,6 @@ dependencies = [
  "hmac",
  "rand_core 0.6.3",
  "serde",
- "serde_cbor",
  "serde_json",
  "sha2 0.10.5",
  "smallvec",
@@ -2016,16 +1982,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 dependencies = [
  "serde_derive",
-]
-
-[[package]]
-name = "serde_cbor"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bef2ebfde456fb76bbcf9f59315333decc4fda0b2b44b420243c11e0f5ec1f5"
-dependencies = [
- "half",
- "serde",
 ]
 
 [[package]]

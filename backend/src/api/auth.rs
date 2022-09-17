@@ -11,6 +11,7 @@ use ed25519_dalek::{Keypair, KEYPAIR_LENGTH};
 use jwt_compact::alg::Ed25519;
 use jwt_compact::{AlgorithmExt, TimeOptions, Token, UntrustedToken};
 use serde::{Deserialize, Serialize};
+use tracing::warn;
 
 // pub type Authority = actix_jwt_auth_middleware::Authority<UserClaims>;
 
@@ -23,29 +24,23 @@ pub enum AuthError {
 
 impl ApiError for AuthError {
     fn to_http(&self) -> (StatusCode, String) {
-        todo!()
-        // match self {
-        //     AuthError::NoCookie => (StatusCode::UNAUTHORIZED, "No cookie".to_string()),
-        //     AuthError::UnparsableToken(e) => (StatusCode::UNAUTHORIZED, format!("{:?}", e)),
-        //     AuthError::InvalidToken(e) => (StatusCode::UNAUTHORIZED, format!("{:?}", e)),
-        // }
+        match self {
+            AuthError::NoCookie => (
+                StatusCode::UNAUTHORIZED,
+                "No session cookie found".to_string(),
+            ),
+            AuthError::UnparsableToken(_) => (
+                StatusCode::BAD_REQUEST,
+                "Could not parse session token".to_string(),
+            ),
+            AuthError::InvalidToken(_) => (
+                StatusCode::UNAUTHORIZED,
+                "Your session token does not pass validation, probably you should relogin"
+                    .to_string(),
+            ),
+        }
     }
 }
-
-// impl ResponseError for AuthError {
-//     fn error_response(&self) -> HttpResponse<BoxBody> {
-//         match self {
-//             AuthError::NoCookie => HttpResponse::Unauthorized().json(HashMap::from([("", "")])),
-//             AuthError::UnparsableToken(_) => {
-//                 HttpResponse::BadRequest().json(HashMap::from([("", "")]))
-//             }
-//             AuthError::InvalidToken(ValidationError::Expired | ValidationError::NotMature) => {
-//                 StatusCode::UNAUTHORIZED
-//             }
-//             AuthError::InvalidToken(_) => StatusCode::BAD_REQUEST,
-//         }
-//     }
-// }
 
 pub struct Authority {
     pub cookie_name: &'static str,
@@ -110,7 +105,10 @@ impl FromRequest for UserClaims {
             Some(authority) => authority
                 .extract_from_cookie(req.cookie(authority.cookie_name))
                 .map(|token| token.claims().clone().custom) // TODO: we may want to provide a way to get standard claims like exp or iat
-                .map_err(|e| e.into()),
+                .map_err(|e| {
+                    warn!("Could not extract user claims from cookie: {:?}", e);
+                    e.into()
+                }),
             None => Err(anyhow!("Authority is not registered??").into()),
         })
     }

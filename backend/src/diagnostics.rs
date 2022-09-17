@@ -14,10 +14,9 @@ impl RequestIds {
     pub fn from_request(req: &HttpRequest) -> RequestIds {
         let ext = req.extensions();
         let root_span = ext.get::<RootSpan>().expect("Expected root span to be set");
-        let request_id = ext
+        let request_id = *ext
             .get::<RequestId>()
-            .expect("Expected request id to be set")
-            .clone();
+            .expect("Expected request id to be set");
 
         let otel_context = root_span.context();
         let otel_span = otel_context.span();
