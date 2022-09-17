@@ -1,15 +1,16 @@
 use chrono::NaiveDateTime;
 use derive_more::{From, Into};
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, From, Into)]
+#[derive(Debug, Clone, Copy, From, Into, Serialize, Deserialize)]
 pub struct UserId(pub i32);
-#[derive(Debug, From, Into)]
+#[derive(Debug, Clone, Copy, From, Into)]
 pub struct SessionId(pub i32);
-#[derive(Debug, From, Into)]
+#[derive(Debug, Clone, Copy, From, Into)]
 pub struct AttendanceMarkId(pub i32);
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Clone, Queryable)]
 pub struct User {
     #[diesel(deserialize_as = i32)]
     pub id: UserId,
@@ -17,7 +18,7 @@ pub struct User {
     pub name: String,
 }
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Clone, Queryable)]
 pub struct AttendanceMark {
     #[diesel(deserialize_as = i32)]
     pub id: AttendanceMarkId,
@@ -29,7 +30,7 @@ pub struct AttendanceMark {
     pub is_manual: bool,
 }
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Clone, Queryable)]
 pub struct Session {
     #[diesel(deserialize_as = i32)]
     pub id: SessionId,

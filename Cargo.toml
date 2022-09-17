@@ -8,3 +8,7 @@ members = [
 inherits = "release"
 debug = 0
 lto = 'thin'
+
+[patch.crates-io]
+# this is temporary, until new version with ErrorHandlers::default_handler is released
+actix-web = { git = "https://github.com/actix/actix-web", rev = "bd5c0af0a6bf9a720cf0685b3334151de1d43c32" }

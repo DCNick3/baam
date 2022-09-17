@@ -7,9 +7,13 @@ extern crate diesel;
 mod api;
 mod config;
 mod db;
-mod error;
+mod diagnostics;
+mod middlewares;
 
+use crate::api::AuthKeys;
+use crate::middlewares::AddDiagnosticIds;
 use actix::SyncArbiter;
+use actix_web::middleware::ErrorHandlers;
 use actix_web::{web, App, HttpServer};
 use anyhow::{Context, Result};
 use opentelemetry::sdk::resource::{EnvResourceDetector, SdkProvidedResourceDetector};
@@ -98,18 +102,33 @@ async fn main_impl() -> Result<()> {
 
     let config = config::Config::load(&environment).context("Loading config")?;
 
+    let auth_keys = AuthKeys::new([
+        // TODO: replace this hard-coded key with something more secure
+        0x5c, 0x6a, 0xc5, 0xf2, 0xb8, 0x12, 0xf1, 0x9d, 0x7e, 0x70, 0xd1, 0xe4, 0x9a, 0x28, 0x20,
+        0xa6, 0x5b, 0xba, 0xb8, 0x9a, 0xa3, 0x76, 0x0d, 0xb0, 0x80, 0x53, 0xe4, 0x3d, 0x7a, 0x5d,
+        0x27, 0x08, 0x3a, 0xb6, 0xf8, 0x28, 0xf2, 0x69, 0x04, 0x61, 0xd7, 0x05, 0xdb, 0x89, 0x1d,
+        0x0d, 0xef, 0x94, 0x6e, 0xdd, 0xc2, 0x44, 0xf2, 0x92, 0xa3, 0x67, 0x71, 0x80, 0x31, 0xe5,
+        0xb2, 0xcb, 0x8f, 0xc0,
+    ])
+    .context("Generating auth keys")?;
+
     let database = db::DbExecutor::new(&database_url).context("Connecting to the database")?;
     let database = SyncArbiter::start(3, move || database.clone());
-    let api = api::configure().context("Configuring api")?;
+    let api = api::configure(auth_keys).context("Configuring api")?;
     let frontend = baam_frontend::configure(config.frontend).context("Configuring frontend")?;
 
     println!("Starting server on http://{}/", config.server.endpoint);
 
     HttpServer::new(move || {
         App::new()
+            .wrap(AddDiagnosticIds)
             .wrap(TracingLogger::default())
             .app_data(web::Data::new(database.clone()))
-            .service(web::scope("/api").configure(api.clone()))
+            .service(
+                web::scope("/api")
+                    .configure(api.clone())
+                    .wrap(ErrorHandlers::new().default_handler(api::error::api_error_handler)),
+            )
             .configure(frontend.clone())
     })
     .bind(config.server.endpoint)?
