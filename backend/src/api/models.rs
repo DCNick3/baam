@@ -1,10 +1,11 @@
 use crate::db::models as db_models;
+use crate::db::models::SessionId;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Session {
-    pub id: i32,
+    pub id: SessionId,
     pub title: String,
     pub start_time: DateTime<Utc>,
     pub end_time: Option<DateTime<Utc>>,
@@ -13,7 +14,7 @@ pub struct Session {
 impl From<db_models::Session> for Session {
     fn from(db_session: db_models::Session) -> Self {
         Self {
-            id: db_session.id.0,
+            id: db_session.id,
             title: db_session.title,
             start_time: db_session.start_time.and_local_timezone(Utc).unwrap(),
             end_time: db_session
@@ -24,8 +25,18 @@ impl From<db_models::Session> for Session {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct NewSession {
+    pub title: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct DeleteSession {
+    pub session_id: SessionId,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct SessionWithMarks {
-    pub id: i32,
+    pub id: SessionId,
     pub title: String,
     pub start_time: DateTime<Utc>,
     pub end_time: Option<DateTime<Utc>>,
@@ -34,7 +45,6 @@ pub struct SessionWithMarks {
 
 #[derive(Serialize, Deserialize)]
 pub struct AttendanceMark {
-    pub user_id: i32,
     pub username: String,
     pub mark_time: DateTime<Utc>,
     pub is_manual: bool,

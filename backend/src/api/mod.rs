@@ -1,19 +1,22 @@
 pub mod auth;
 pub mod error;
 mod models;
+mod sessions;
 mod sso;
 
 use crate::api::models::LoginRequest;
 use crate::db::models as db_models;
-use crate::db::{DbData, GetOrCreateUser, GetSessions};
+use crate::db::DbData;
 use actix_web::cookie::Cookie;
 use actix_web::http::StatusCode;
 use actix_web::{get, post, web, web::ServiceConfig, HttpResponse, Responder};
 use anyhow::{anyhow, Result};
 use error::ApiResult;
 use std::collections::HashMap;
+use tracing::Span;
 
 use crate::api::auth::UserClaims;
+use crate::db;
 pub use auth::AuthKeys;
 
 #[get("/")]
@@ -31,13 +34,6 @@ async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
 }
 
-#[get("/sessions")]
-async fn get_sessions(db: DbData) -> ApiResult<web::Json<Vec<models::Session>>> {
-    let sessions = db.send(GetSessions).await??;
-
-    Ok(web::Json(sessions.into_iter().map(|v| v.into()).collect()))
-}
-
 #[get("/error")]
 async fn make_error() -> ApiResult<web::Bytes> {
     Err(anyhow!("Example error").into())
@@ -52,7 +48,8 @@ async fn login(
     let body = body.into_inner();
 
     let user: db_models::User = db
-        .send(GetOrCreateUser {
+        .send(db::GetOrCreateUser {
+            span: Span::current(),
             username: body.username,
             name: body.name,
         })
@@ -78,6 +75,10 @@ async fn me(user: UserClaims) -> ApiResult<web::Json<models::User>> {
     }))
 }
 
+async fn not_found() -> HttpResponse {
+    HttpResponse::NotFound().body("Api route handler not found")
+}
+
 pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> {
     let auth = auth::configure(keys)?;
 
@@ -85,10 +86,13 @@ pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> 
         cfg.service(hello)
             .service(ping)
             .service(echo)
-            .service(get_sessions)
+            .service(sessions::get_sessions)
+            .service(sessions::create_session)
+            .service(sessions::delete_session)
             .service(make_error)
             .service(login)
             .service(me)
-            .configure(auth.clone());
+            .configure(auth.clone())
+            .default_service(web::route().to(not_found));
     })
 }

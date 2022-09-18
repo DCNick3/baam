@@ -9,7 +9,6 @@ Content-Type: application/json
 
 ### Get my profile
 GET {{base_url}}/api/me
-Cookie: session={{session}}
 
 ### Raise a 500 error
 GET {{base_url}}/api/error
@@ -18,4 +17,18 @@ GET {{base_url}}/api/error
 POST {{base_url}}/api/login
 Content-Type: application/json
 
+{ "bad": "request" }
+
+### Create a session
+POST {{base_url}}/api/sessions
+Content-Type: application/json
+
 {
+  "title": "Example Session"
+}
+
+### Get sessions
+GET {{base_url}}/api/sessions
+
+### Delete session
+DELETE {{base_url}}/api/sessions/4

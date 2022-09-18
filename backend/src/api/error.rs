@@ -1,4 +1,5 @@
 use crate::api::auth::AuthError;
+use crate::api::sessions::SessionNotFoundError;
 use crate::diagnostics::RequestIds;
 use actix_web::body::{BoxBody, EitherBody, MessageBody};
 use actix_web::http::StatusCode;
@@ -29,11 +30,13 @@ impl ApiError for AnyhowApiError {
 }
 
 /// Necessary because of this issue: https://github.com/actix/actix-web/issues/1711
+#[allow(clippy::enum_variant_names)]
 #[enum_dispatch(ApiError)]
 #[derive(Debug)]
 pub enum Error {
     AnyhowApiError,
     AuthError,
+    SessionNotFoundError,
 }
 pub type ApiResult<T> = Result<T, Error>;
 

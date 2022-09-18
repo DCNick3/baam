@@ -2,14 +2,16 @@ pub mod models;
 #[rustfmt::skip]
 mod schema;
 
+use crate::db::models::{NewUser, SessionId, UserId};
 use actix::prelude::*;
 use anyhow::{Context, Result};
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use r2d2::PooledConnection;
-use tracing::info;
+use tracing::{info, instrument, Span};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
@@ -48,7 +50,12 @@ impl Actor for DbExecutor {
     type Context = SyncContext<Self>;
 }
 
-pub struct GetSessions;
+#[derive(Debug)]
+pub struct GetSessions {
+    pub span: Span,
+    pub user_id: UserId,
+}
+
 impl Message for GetSessions {
     type Result = Result<Vec<models::Session>>;
 }
@@ -56,22 +63,83 @@ impl Message for GetSessions {
 impl Handler<GetSessions> for DbExecutor {
     type Result = <GetSessions as Message>::Result;
 
-    fn handle(&mut self, _msg: GetSessions, _: &mut Self::Context) -> Self::Result {
+    #[instrument(name = "GetSessions", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: GetSessions, _: &mut Self::Context) -> Self::Result {
         use schema::sessions::dsl::*;
 
-        let mut conn = self.0.get().context("Failed to get connection from pool")?;
-
         let results = sessions
-            .load::<models::Session>(&mut conn)
+            .filter(owner_id.eq(&msg.user_id.0))
+            .load::<models::Session>(&mut self.get_conn()?)
             .context("Failed to load sessions")?;
 
         Ok(results)
     }
 }
 
-#[derive(Insertable)]
-#[diesel(table_name = schema::users)]
+#[derive(Debug)]
+pub struct CreateSession {
+    pub span: Span,
+    pub owner_id: UserId,
+    pub title: String,
+    pub start_time: NaiveDateTime,
+}
+
+impl Message for CreateSession {
+    type Result = Result<models::Session>;
+}
+
+impl Handler<CreateSession> for DbExecutor {
+    type Result = <CreateSession as Message>::Result;
+
+    #[instrument(name = "GetOrCreateUser", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: CreateSession, _: &mut Self::Context) -> Self::Result {
+        use schema::sessions::dsl::*;
+
+        let result = diesel::insert_into(sessions)
+            .values((
+                owner_id.eq(&msg.owner_id.0),
+                title.eq(&msg.title),
+                start_time.eq(&msg.start_time),
+            ))
+            .get_result::<models::Session>(&mut self.get_conn()?)
+            .context("Failed to create session")?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Debug)]
+pub struct DeleteSession {
+    pub span: Span,
+    pub session_id: SessionId,
+    pub owner_id: UserId,
+}
+
+impl Message for DeleteSession {
+    type Result = Result<Option<models::Session>>;
+}
+
+impl Handler<DeleteSession> for DbExecutor {
+    type Result = <DeleteSession as Message>::Result;
+
+    #[instrument(name = "DeleteSession", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: DeleteSession, _: &mut Self::Context) -> Self::Result {
+        use schema::sessions::dsl::*;
+
+        let result = diesel::delete(
+            sessions.filter(id.eq(&msg.session_id.0).and(owner_id.eq(&msg.owner_id.0))),
+        )
+        .get_result::<models::Session>(&mut self.get_conn()?)
+        .optional()
+        .context("Failed to delete session")?;
+
+        Ok(result)
+    }
+}
+
+#[derive(Debug)]
 pub struct GetOrCreateUser {
+    pub span: Span,
     pub username: String,
     pub name: String,
 }
@@ -82,11 +150,15 @@ impl Message for GetOrCreateUser {
 impl Handler<GetOrCreateUser> for DbExecutor {
     type Result = <GetOrCreateUser as Message>::Result;
 
+    #[instrument(name = "GetOrCreateUser", parent = &user.span, skip(self))]
     fn handle(&mut self, user: GetOrCreateUser, _: &mut Self::Context) -> Self::Result {
         use schema::users::dsl::*;
 
         let user = diesel::insert_into(users)
-            .values(&user)
+            .values(&NewUser {
+                username: &user.username,
+                name: &user.name,
+            })
             .on_conflict(username)
             .do_update()
             .set(name.eq(&user.name))
