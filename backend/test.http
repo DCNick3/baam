@@ -30,5 +30,11 @@ Content-Type: application/json
 ### Get sessions
 GET {{base_url}}/api/sessions
 
+### Get session
+GET {{base_url}}/api/sessions/1
+
 ### Delete session
 DELETE {{base_url}}/api/sessions/4
+
+### Add attendance mark
+PUT {{base_url}}/api/sessions/1/marks/nikita
