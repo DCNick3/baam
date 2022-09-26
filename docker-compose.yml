@@ -17,6 +17,7 @@ services:
     environment:
       - ENVIRONMENT=dev
       - DATABASE_URL=postgres://postgres@db/postgres
+      - OTEL_EXPORTER_OTLP_ENDPOINT=https://jaeger:6831
     volumes:
       - type: bind
         source: ./config.docker-dev.yml
@@ -26,7 +27,10 @@ services:
     depends_on:
       - db
       - frontend
-
-volumes:
-  dev-config:
-    driver: bind
+      - jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      # web ui
+      - "16686:16686"
+      - "6831:6831/udp"
