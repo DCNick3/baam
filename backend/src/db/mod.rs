@@ -2,8 +2,10 @@ pub mod models;
 #[rustfmt::skip]
 mod schema;
 
+use crate::api::error::{ApiError, ApiResult};
 use crate::db::models::{NewAttendanceMark, NewUser, SessionId, UserId};
 use actix::prelude::*;
+use actix_http::StatusCode;
 use anyhow::{Context, Result};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
@@ -13,6 +15,15 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use r2d2::PooledConnection;
 use std::collections::HashMap;
 use tracing::{info, instrument, Span};
+
+#[derive(Debug)]
+pub struct SessionNotFoundError;
+
+impl ApiError for SessionNotFoundError {
+    fn to_http(&self) -> (StatusCode, String) {
+        (StatusCode::NOT_FOUND, "Session not found".to_string())
+    }
+}
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
@@ -119,14 +130,14 @@ impl Handler<GetSessions> for DbExecutor {
 }
 
 impl Message for GetSession {
-    type Result = Result<Option<models::SessionWithMarks>>;
+    type Result = ApiResult<models::SessionWithMarks>;
 }
 impl Handler<GetSession> for DbExecutor {
     type Result = <GetSession as Message>::Result;
 
     #[instrument(name = "GetSession", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: GetSession, _: &mut Self::Context) -> Self::Result {
-        self.get_conn()?.transaction(|conn| -> Result<_> {
+        self.get_conn()?.transaction(|conn| -> ApiResult<_> {
             let session: Option<models::Session> = {
                 use schema::sessions::dsl::*;
                 sessions
@@ -137,7 +148,7 @@ impl Handler<GetSession> for DbExecutor {
                     .context("Failed to load session")?
             };
 
-            Ok(if let Some(session) = session {
+            if let Some(session) = session {
                 let marks: Vec<models::AttendanceMark> = {
                     use schema::marks::dsl::*;
                     marks
@@ -166,10 +177,10 @@ impl Handler<GetSession> for DbExecutor {
                     .map(|u| (u.id, u))
                     .collect::<HashMap<_, _>>();
 
-                Some((session, marks, users))
+                Ok((session, marks, users))
             } else {
-                None
-            })
+                Err(SessionNotFoundError.into())
+            }
         })
     }
 }
@@ -198,35 +209,48 @@ impl Handler<CreateSession> for DbExecutor {
 }
 
 impl Message for DeleteSession {
-    type Result = Result<Option<models::Session>>;
+    type Result = ApiResult<models::Session>;
 }
 impl Handler<DeleteSession> for DbExecutor {
     type Result = <DeleteSession as Message>::Result;
 
     #[instrument(name = "DeleteSession", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: DeleteSession, _: &mut Self::Context) -> Self::Result {
-        use schema::sessions::dsl::*;
+        self.get_conn()?.transaction(|conn| -> ApiResult<_> {
+            {
+                use schema::marks::dsl::*;
+                diesel::delete(marks.filter(id.eq(&msg.session_id.0)))
+                    .execute(conn)
+                    .context("Failed to delete session marks")?;
+            }
 
-        let result = diesel::delete(
-            sessions.filter(id.eq(&msg.session_id.0).and(owner_id.eq(&msg.owner_id.0))),
-        )
-        .get_result::<models::Session>(&mut self.get_conn()?)
-        .optional()
-        .context("Failed to delete session")?;
+            if let Some(session) = {
+                use schema::sessions::dsl::*;
 
-        Ok(result)
+                diesel::delete(
+                    sessions.filter(id.eq(&msg.session_id.0).and(owner_id.eq(&msg.owner_id.0))),
+                )
+                .get_result::<models::Session>(conn)
+                .optional()
+                .context("Failed to delete session")
+            }? {
+                Ok(session)
+            } else {
+                Err(SessionNotFoundError.into())
+            }
+        })
     }
 }
 
 impl Message for AddAttendanceMark {
-    type Result = Result<Option<models::AttendanceMark>>;
+    type Result = ApiResult<models::AttendanceMark>;
 }
 impl Handler<AddAttendanceMark> for DbExecutor {
     type Result = <AddAttendanceMark as Message>::Result;
 
     #[instrument(name = "AddAttendanceMark", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: AddAttendanceMark, _: &mut Self::Context) -> Self::Result {
-        self.get_conn()?.transaction(|conn| -> Result<_> {
+        self.get_conn()?.transaction(|conn| -> ApiResult<_> {
             let user: models::User = {
                 use schema::users::dsl::*;
                 users
@@ -262,32 +286,30 @@ impl Handler<AddAttendanceMark> for DbExecutor {
             }
             .is_none()
             {
-                return Ok(None);
+                return Err(SessionNotFoundError.into());
             }
 
             use schema::marks::dsl::*;
-            Ok(Some(
-                diesel::insert_into(marks)
-                    .values(NewAttendanceMark {
-                        session_id: msg.session_id,
-                        user_id: user.id,
-                        mark_time: msg.mark_time,
-                        is_manual: msg.is_manual,
-                    })
-                    .on_conflict((session_id, user_id))
-                    .do_nothing()
-                    .get_result(conn)
-                    .optional()
-                    .context("Failed to insert mark")
-                    .transpose()
-                    .unwrap_or_else(|| {
-                        marks
-                            .filter(session_id.eq(&msg.session_id.0))
-                            .filter(user_id.eq(&user.id.0))
-                            .first(conn)
-                            .context("Failed to load an already existing mark")
-                    })?,
-            ))
+            Ok(diesel::insert_into(marks)
+                .values(NewAttendanceMark {
+                    session_id: msg.session_id,
+                    user_id: user.id,
+                    mark_time: msg.mark_time,
+                    is_manual: msg.is_manual,
+                })
+                .on_conflict((session_id, user_id))
+                .do_nothing()
+                .get_result(conn)
+                .optional()
+                .context("Failed to insert mark")
+                .transpose()
+                .unwrap_or_else(|| {
+                    marks
+                        .filter(session_id.eq(&msg.session_id.0))
+                        .filter(user_id.eq(&user.id.0))
+                        .first(conn)
+                        .context("Failed to load an already existing mark")
+                })?)
         })
     }
 }
@@ -341,12 +363,14 @@ impl Handler<DeleteAttendanceMark> for DbExecutor {
             }
 
             use schema::marks::dsl::*;
-            diesel::delete(marks)
-                .filter(session_id.eq(&msg.session_id.0))
-                .filter(user_id.eq(&user.id.0))
-                .get_result(conn)
-                .optional()
-                .context("Failed to insert mark")
+            diesel::delete(
+                marks
+                    .filter(session_id.eq(&msg.session_id.0))
+                    .filter(user_id.eq(&user.id.0)),
+            )
+            .get_result(conn)
+            .optional()
+            .context("Failed to insert mark")
         })
     }
 }

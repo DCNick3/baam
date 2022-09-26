@@ -1,22 +1,12 @@
 use crate::api::auth::UserClaims;
-use crate::api::error::{ApiError, ApiResult};
+use crate::api::error::ApiResult;
 use crate::api::models;
 use crate::db;
 use crate::db::DbData;
-use actix_http::StatusCode;
 use actix_web::{delete, get, post, put, web};
 use chrono::TimeZone;
 use chrono::Utc;
 use tracing::Span;
-
-#[derive(Debug)]
-pub struct SessionNotFoundError;
-
-impl ApiError for SessionNotFoundError {
-    fn to_http(&self) -> (StatusCode, String) {
-        (StatusCode::NOT_FOUND, "Session not found".to_string())
-    }
-}
 
 #[get("/sessions")]
 async fn get_sessions(user: UserClaims, db: DbData) -> ApiResult<web::Json<Vec<models::Session>>> {
@@ -64,11 +54,7 @@ async fn get_session(
         })
         .await??;
 
-    if let Some(session) = session {
-        Ok(web::Json(session.into()))
-    } else {
-        ApiResult::Err(SessionNotFoundError.into())
-    }
+    Ok(web::Json(session.into()))
 }
 
 #[delete("/sessions/{session_id}")]
@@ -86,11 +72,7 @@ async fn delete_session(
         })
         .await??;
 
-    if let Some(session) = session {
-        Ok(web::Json(session.into()))
-    } else {
-        ApiResult::Err(SessionNotFoundError.into())
-    }
+    Ok(web::Json(session.into()))
 }
 
 #[put("/sessions/{session_id}/marks/{username}")]
@@ -102,7 +84,7 @@ async fn add_mark(
     let time = Utc::now();
 
     let req = req.into_inner();
-    let mark: Option<db::models::AttendanceMark> = db
+    let mark: db::models::AttendanceMark = db
         .send(db::AddAttendanceMark {
             span: Span::current(),
             owner_id: user.user_id,
@@ -113,13 +95,9 @@ async fn add_mark(
         })
         .await??;
 
-    if let Some(mark) = mark {
-        Ok(web::Json(models::AttendanceMark {
-            username: req.username,
-            mark_time: Utc.from_utc_datetime(&mark.mark_time),
-            is_manual: mark.is_manual,
-        }))
-    } else {
-        ApiResult::Err(SessionNotFoundError.into())
-    }
+    Ok(web::Json(models::AttendanceMark {
+        username: req.username,
+        mark_time: Utc.from_utc_datetime(&mark.mark_time),
+        is_manual: mark.is_manual,
+    }))
 }
