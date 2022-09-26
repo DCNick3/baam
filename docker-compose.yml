@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  app:
+    build: .
+    environment:
+      - ENVIRONMENT=dev
+      - DATABASE_URL=postgres://postgres@db/postgres
+    volumes:
+      - type: bind
+        source: ./config.docker-dev.yml
+        target: /config.dev.yml
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  dev-config:
+    driver: bind
