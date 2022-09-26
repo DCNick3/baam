@@ -73,7 +73,7 @@ pub struct AttendanceMark {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct AddAttendanceMark {
+pub struct AttendanceMarkRef {
     pub session_id: SessionId,
     pub username: String,
 }

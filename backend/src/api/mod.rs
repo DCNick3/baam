@@ -95,6 +95,7 @@ pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> 
             .service(sessions::get_session)
             .service(sessions::delete_session)
             .service(sessions::add_mark)
+            .service(sessions::delete_mark)
             // auth
             .service(login)
             .service(me)

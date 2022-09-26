@@ -79,7 +79,7 @@ async fn delete_session(
 async fn add_mark(
     user: UserClaims,
     db: DbData,
-    req: web::Path<models::AddAttendanceMark>,
+    req: web::Path<models::AttendanceMarkRef>,
 ) -> ApiResult<web::Json<models::AttendanceMark>> {
     let time = Utc::now();
 
@@ -92,6 +92,29 @@ async fn add_mark(
             student_username: req.username.clone(),
             mark_time: time.naive_utc(),
             is_manual: true,
+        })
+        .await??;
+
+    Ok(web::Json(models::AttendanceMark {
+        username: req.username,
+        mark_time: Utc.from_utc_datetime(&mark.mark_time),
+        is_manual: mark.is_manual,
+    }))
+}
+
+#[delete("/sessions/{session_id}/marks/{username}")]
+async fn delete_mark(
+    user: UserClaims,
+    db: DbData,
+    req: web::Path<models::AttendanceMarkRef>,
+) -> ApiResult<web::Json<models::AttendanceMark>> {
+    let req = req.into_inner();
+    let mark: db::models::AttendanceMark = db
+        .send(db::DeleteAttendanceMark {
+            span: Span::current(),
+            owner_id: user.user_id,
+            session_id: req.session_id,
+            student_username: req.username.clone(),
         })
         .await??;
 

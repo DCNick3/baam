@@ -17,11 +17,17 @@ use std::collections::HashMap;
 use tracing::{info, instrument, Span};
 
 #[derive(Debug)]
-pub struct SessionNotFoundError;
+pub enum DbError {
+    SessionNotFound,
+    MarkNotFound,
+}
 
-impl ApiError for SessionNotFoundError {
+impl ApiError for DbError {
     fn to_http(&self) -> (StatusCode, String) {
-        (StatusCode::NOT_FOUND, "Session not found".to_string())
+        match self {
+            DbError::SessionNotFound => (StatusCode::NOT_FOUND, "Session not found".to_string()),
+            DbError::MarkNotFound => (StatusCode::NOT_FOUND, "Mark not found".to_string()),
+        }
     }
 }
 
@@ -48,6 +54,8 @@ impl DbExecutor {
             MigrationHarness::run_pending_migrations(&mut conn, MIGRATIONS)
                 .map_err(|e| anyhow::anyhow!("Failed to run migrations: {}", e))?;
             info!("All pending locations applied");
+        } else {
+            info!("Database is up to date, no migrations needed");
         }
 
         Ok(Self(pool))
@@ -110,8 +118,53 @@ pub struct GetOrCreateUser {
     pub name: String,
 }
 
+fn get_or_create_user(
+    conn: &mut Connection,
+    username_: &str,
+    name_: Option<&str>,
+) -> ApiResult<models::User> {
+    use schema::users::dsl::*;
+    let user: models::User = {
+        users
+            .filter(username.eq(username_))
+            .first::<models::User>(conn)
+            .optional()
+            .context("Failed to load session")
+    }
+    .transpose()
+    .unwrap_or_else(|| {
+        diesel::insert_into(users)
+            .values(&NewUser {
+                username: username_,
+                name: name_,
+            })
+            .on_conflict(username)
+            .do_update()
+            .set(name.eq(None as Option<&str>))
+            .get_result::<models::User>(conn)
+            .context("Failed to insert user")
+    })?;
+
+    Ok(user)
+}
+
+fn get_session(
+    conn: &mut Connection,
+    session_id_: SessionId,
+    owner_id_: UserId,
+) -> ApiResult<models::Session> {
+    use schema::sessions::dsl::*;
+    sessions
+        .filter(id.eq(&session_id_.0))
+        .filter(owner_id.eq(&owner_id_.0))
+        .first(conn)
+        .optional()
+        .context("Failed to load session")?
+        .ok_or_else(|| DbError::SessionNotFound.into())
+}
+
 impl Message for GetSessions {
-    type Result = Result<Vec<models::Session>>;
+    type Result = ApiResult<Vec<models::Session>>;
 }
 impl Handler<GetSessions> for DbExecutor {
     type Result = <GetSessions as Message>::Result;
@@ -138,55 +191,43 @@ impl Handler<GetSession> for DbExecutor {
     #[instrument(name = "GetSession", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: GetSession, _: &mut Self::Context) -> Self::Result {
         self.get_conn()?.transaction(|conn| -> ApiResult<_> {
-            let session: Option<models::Session> = {
-                use schema::sessions::dsl::*;
-                sessions
-                    .filter(id.eq(&msg.session_id.0))
-                    .filter(owner_id.eq(&msg.owner_id.0))
-                    .first(conn)
-                    .optional()
-                    .context("Failed to load session")?
+            let session = get_session(conn, msg.session_id, msg.owner_id)?;
+
+            let marks: Vec<models::AttendanceMark> = {
+                use schema::marks::dsl::*;
+                marks
+                    .filter(session_id.eq(&msg.session_id.0))
+                    .load(conn)
+                    .context("Failed to load marks")?
             };
 
-            if let Some(session) = session {
-                let marks: Vec<models::AttendanceMark> = {
-                    use schema::marks::dsl::*;
-                    marks
-                        .filter(session_id.eq(&msg.session_id.0))
-                        .load(conn)
-                        .context("Failed to load marks")?
-                };
+            let mark_user_ids = marks.iter().map(|m| m.user_id.0).collect::<Vec<_>>();
 
-                let mark_user_ids = marks.iter().map(|m| m.user_id.0).collect::<Vec<_>>();
+            let users: Vec<models::User> = {
+                use schema::users::dsl::*;
+                users
+                    .filter(id.eq_any(mark_user_ids))
+                    .load(conn)
+                    .context("Failed to load users")?
+            };
 
-                let users: Vec<models::User> = {
-                    use schema::users::dsl::*;
-                    users
-                        .filter(id.eq_any(mark_user_ids))
-                        .load(conn)
-                        .context("Failed to load users")?
-                };
+            let marks = marks
+                .into_iter()
+                .map(|m| (m.id, m))
+                .collect::<HashMap<_, _>>();
 
-                let marks = marks
-                    .into_iter()
-                    .map(|m| (m.id, m))
-                    .collect::<HashMap<_, _>>();
+            let users = users
+                .into_iter()
+                .map(|u| (u.id, u))
+                .collect::<HashMap<_, _>>();
 
-                let users = users
-                    .into_iter()
-                    .map(|u| (u.id, u))
-                    .collect::<HashMap<_, _>>();
-
-                Ok((session, marks, users))
-            } else {
-                Err(SessionNotFoundError.into())
-            }
+            Ok((session, marks, users))
         })
     }
 }
 
 impl Message for CreateSession {
-    type Result = Result<models::Session>;
+    type Result = ApiResult<models::Session>;
 }
 impl Handler<CreateSession> for DbExecutor {
     type Result = <CreateSession as Message>::Result;
@@ -223,8 +264,7 @@ impl Handler<DeleteSession> for DbExecutor {
                     .execute(conn)
                     .context("Failed to delete session marks")?;
             }
-
-            if let Some(session) = {
+            {
                 use schema::sessions::dsl::*;
 
                 diesel::delete(
@@ -232,12 +272,9 @@ impl Handler<DeleteSession> for DbExecutor {
                 )
                 .get_result::<models::Session>(conn)
                 .optional()
-                .context("Failed to delete session")
-            }? {
-                Ok(session)
-            } else {
-                Err(SessionNotFoundError.into())
+                .context("Failed to delete session")?
             }
+            .ok_or_else(|| DbError::SessionNotFound.into())
         })
     }
 }
@@ -251,43 +288,10 @@ impl Handler<AddAttendanceMark> for DbExecutor {
     #[instrument(name = "AddAttendanceMark", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: AddAttendanceMark, _: &mut Self::Context) -> Self::Result {
         self.get_conn()?.transaction(|conn| -> ApiResult<_> {
-            let user: models::User = {
-                use schema::users::dsl::*;
-                users
-                    .filter(username.eq(&msg.student_username))
-                    .first::<models::User>(conn)
-                    .optional()
-                    .context("Failed to load session")
-            }
-            .transpose()
-            .unwrap_or_else(|| {
-                use schema::users::dsl::*;
-                diesel::insert_into(users)
-                    .values(&NewUser {
-                        username: msg.student_username.as_str(),
-                        name: None,
-                    })
-                    .on_conflict(username)
-                    .do_update()
-                    .set(name.eq(None as Option<&str>))
-                    .get_result::<models::User>(&mut self.get_conn()?)
-                    .context("Failed to insert user")
-            })?;
+            let user = get_or_create_user(conn, &msg.student_username, None)?;
 
             // check that the session is owned by the supplied owner_id
-            if {
-                use schema::sessions::dsl::*;
-                sessions
-                    .filter(id.eq(&msg.session_id.0))
-                    .filter(owner_id.eq(&msg.owner_id.0))
-                    .first::<models::Session>(conn)
-                    .optional()
-                    .context("Failed to load session")?
-            }
-            .is_none()
-            {
-                return Err(SessionNotFoundError.into());
-            }
+            let _session = get_session(conn, msg.session_id, msg.owner_id)?;
 
             use schema::marks::dsl::*;
             Ok(diesel::insert_into(marks)
@@ -315,86 +319,43 @@ impl Handler<AddAttendanceMark> for DbExecutor {
 }
 
 impl Message for DeleteAttendanceMark {
-    type Result = Result<Option<models::AttendanceMark>>;
+    type Result = ApiResult<models::AttendanceMark>;
 }
 impl Handler<DeleteAttendanceMark> for DbExecutor {
     type Result = <DeleteAttendanceMark as Message>::Result;
 
     #[instrument(name = "DeleteAttendanceMark", parent = &msg.span, skip(self))]
     fn handle(&mut self, msg: DeleteAttendanceMark, _: &mut Self::Context) -> Self::Result {
-        self.get_conn()?.transaction(|conn| -> Result<_> {
-            // TODO: extract
-            let user: models::User = {
-                use schema::users::dsl::*;
-                users
-                    .filter(username.eq(&msg.student_username))
-                    .first::<models::User>(conn)
-                    .optional()
-                    .context("Failed to load session")
-            }
-            .transpose()
-            .unwrap_or_else(|| {
-                use schema::users::dsl::*;
-                diesel::insert_into(users)
-                    .values(&NewUser {
-                        username: msg.student_username.as_str(),
-                        name: None,
-                    })
-                    .on_conflict(username)
-                    .do_update()
-                    .set(name.eq(None as Option<&str>))
-                    .get_result::<models::User>(&mut self.get_conn()?)
-                    .context("Failed to insert user")
-            })?;
+        self.get_conn()?.transaction(|conn| -> ApiResult<_> {
+            let user = get_or_create_user(conn, &msg.student_username, None)?;
 
             // check that the session is owned by the supplied owner_id
-            if {
-                use schema::sessions::dsl::*;
-                sessions
-                    .filter(id.eq(&msg.session_id.0))
-                    .filter(owner_id.eq(&msg.owner_id.0))
-                    .first::<models::Session>(conn)
-                    .optional()
-                    .context("Failed to load session")?
-            }
-            .is_none()
-            {
-                return Ok(None);
-            }
+            let _session = get_session(conn, msg.session_id, msg.owner_id)?;
 
             use schema::marks::dsl::*;
-            diesel::delete(
+
+            Ok(diesel::delete(
                 marks
                     .filter(session_id.eq(&msg.session_id.0))
                     .filter(user_id.eq(&user.id.0)),
             )
             .get_result(conn)
             .optional()
-            .context("Failed to insert mark")
+            .context("Failed to insert mark")?
+            .ok_or(DbError::MarkNotFound)?)
         })
     }
 }
 
 impl Message for GetOrCreateUser {
-    type Result = Result<models::User>;
+    type Result = ApiResult<models::User>;
 }
 impl Handler<GetOrCreateUser> for DbExecutor {
     type Result = <GetOrCreateUser as Message>::Result;
 
-    #[instrument(name = "GetOrCreateUser", parent = &user.span, skip(self))]
-    fn handle(&mut self, user: GetOrCreateUser, _: &mut Self::Context) -> Self::Result {
-        use schema::users::dsl::*;
-
-        let user = diesel::insert_into(users)
-            .values(&NewUser {
-                username: user.username.as_str(),
-                name: Some(user.name.as_str()),
-            })
-            .on_conflict(username)
-            .do_update()
-            .set(name.eq(&user.name))
-            .get_result::<models::User>(&mut self.get_conn()?)
-            .context("Failed to insert user")?;
+    #[instrument(name = "GetOrCreateUser", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: GetOrCreateUser, _: &mut Self::Context) -> Self::Result {
+        let user = get_or_create_user(&mut self.get_conn()?, &msg.username, Some(&msg.name))?;
 
         Ok(user)
     }
