@@ -4,6 +4,7 @@ members = [
     "frontend",
     "diesel-tracing",
 ]
+resolver = "2"
 
 [profile.ship]
 inherits = "release"
