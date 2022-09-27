@@ -1,9 +1,9 @@
 [package]
 name = "diesel-tracing"
-version = "0.1.6"
+version = "0.2.0"
 authors = ["John Children <john@cambridgequantum.com>"]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 description = "Connection telemetry middleware for diesel and tracing"
 repository = "https://github.com/CQCL/diesel-tracing"
 readme = "README.md"

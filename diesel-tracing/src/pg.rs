@@ -228,7 +228,7 @@ fn dump_query<Q: QueryFragment<Pg>>(query: &Q) -> (String, String) {
     let backend = Pg::default();
     if let Err(e) = QueryFragment::<Pg>::to_sql(query, &mut query_builder, &backend) {
         // TODO: maybe there is a more graceful way to handle it?
-        panic!("Failed to convert query to SQL: {}", e)
+        panic!("Failed to convert query to SQL: {}", e);
     }
 
     let query_str: String = query_builder.finish();
@@ -236,8 +236,7 @@ fn dump_query<Q: QueryFragment<Pg>>(query: &Q) -> (String, String) {
     let operation = query_str
         .as_str()
         .split_once(' ')
-        .map(|(op, _)| op)
-        .unwrap_or(&query_str)
+        .map_or(query_str.as_str(), |(op, _)| op)
         .to_string();
 
     (query_str, operation)
