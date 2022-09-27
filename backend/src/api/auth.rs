@@ -119,7 +119,7 @@ impl From<db_models::User> for UserClaims {
         Self {
             user_id: u.id,
             username: u.username,
-            name: u.name,
+            name: u.name.expect("BUG: User must have a name to be logged in"),
         }
     }
 }
@@ -137,6 +137,7 @@ impl AuthKeys {
         Ok(Self(Keypair::from_bytes(&bytes)?))
     }
 
+    #[allow(unused)]
     pub fn try_new(bytes: &[u8]) -> Result<Self> {
         Ok(Self(Keypair::from_bytes(bytes)?))
     }

@@ -21,6 +21,7 @@ use opentelemetry::sdk::{trace as sdktrace, Resource};
 use opentelemetry_otlp::{HasExportConfig, WithExportConfig};
 use std::io::ErrorKind;
 use std::time::Duration;
+use tracing::info;
 use tracing_actix_web::TracingLogger;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::SubscriberExt;
@@ -59,7 +60,11 @@ fn init_tracing() -> Result<()> {
     let tracer = init_tracer().context("Setting up the opentelemetry exporter")?;
 
     Registry::default()
-        .with(tracing_subscriber::EnvFilter::new("INFO"))
+        .with(
+            tracing_subscriber::EnvFilter::builder()
+                .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
+                .from_env_lossy(),
+        )
         .with(
             tracing_subscriber::fmt::Layer::new()
                 .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
@@ -117,7 +122,7 @@ async fn main_impl() -> Result<()> {
     let api = api::configure(auth_keys).context("Configuring api")?;
     let frontend = baam_frontend::configure(config.frontend).context("Configuring frontend")?;
 
-    println!("Starting server on http://{}/", config.server.endpoint);
+    info!("Starting server on http://{}/", config.server.endpoint);
 
     HttpServer::new(move || {
         App::new()

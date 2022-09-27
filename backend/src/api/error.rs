@@ -1,5 +1,5 @@
 use crate::api::auth::AuthError;
-use crate::api::sessions::SessionNotFoundError;
+use crate::db::DbError;
 use crate::diagnostics::RequestIds;
 use actix_web::body::{BoxBody, EitherBody, MessageBody};
 use actix_web::http::StatusCode;
@@ -36,7 +36,7 @@ impl ApiError for AnyhowApiError {
 pub enum Error {
     AnyhowApiError,
     AuthError,
-    SessionNotFoundError,
+    DbError,
 }
 pub type ApiResult<T> = Result<T, Error>;
 

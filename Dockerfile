@@ -1,5 +1,23 @@
 # syntax = docker/dockerfile:1.2
 
+FROM bash AS get-tini
+
+# Add Tini init-system
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /tini
+RUN chmod +x /tini
+
+FROM bash AS get-protoc
+
+# Add Tini init-system
+ENV PROTOC_VERSION 21.6
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip -O /protoc.zip && \
+    unzip /protoc.zip -d /protoc_zip && \
+    mv /protoc_zip/bin/protoc /protoc && \
+    chmod +x /protoc && \
+    rm -rf /protoc_zip /protoc.zip
+
 FROM clux/muslrust:stable as chef
 RUN cargo install cargo-chef --locked
 
@@ -24,6 +42,8 @@ ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 RUN node --version
 
+COPY --from=get-protoc /protoc /usr/local/bin/protoc
+
 COPY --from=planner /volume/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
 RUN \
@@ -41,8 +61,9 @@ EXPOSE 8080
 
 ENV ENVIRONMENT=prod
 
+COPY --from=get-tini /tini /tini
 COPY --from=build /volume/baam /baam
 COPY config.yml config.prod.yml /
 
-CMD ["/baam"]
+ENTRYPOINT ["/tini", "--", "/baam"]
 

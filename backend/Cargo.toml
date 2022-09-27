@@ -8,29 +8,28 @@ edition = "2021"
 baam-frontend = { path = "../frontend" }
 
 actix = "0.13.0"
+actix-http = "3.2.2"
 actix-web = "4.2.1"
 anyhow = "1.0.64"
 chrono = { version = "0.4.22", features = ["serde"] }
 config = "0.13.2"
 derive_more = "0.99.17"
 diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
+diesel-tracing = { path = "../diesel-tracing", features = ["postgres", "r2d2"] }
 diesel_migrations = { version = "2.0.0", features = ["postgres"] }
 ed25519-dalek = "1.0.1"
 enum_dispatch = "0.3.8"
 futures = "0.3.24"
 jwt-compact = { version = "0.5.0", features = ["ed25519-dalek", "clock", "std"], default-features = false }
 openssl = "0.10.41"
-# this one fails to update, TODO: investigate
-opentelemetry = { version = "0.17.0", features = ["rt-tokio"] }
-# this one fails to update, TODO: investigate
-opentelemetry-otlp = "0.10.0"
+opentelemetry = { version = "0.18.0", features = ["rt-tokio"] }
+opentelemetry-otlp = "0.11.0"
 r2d2 = "0.8.10"
 rand = "0.8.5"
 serde = "1.0.144"
 serde_json = "1.0.85"
 tracing = "0.1.36"
 tracing-actix-web = { version = "0.6.0", features = ["opentelemetry_0_17"] }
-tracing-opentelemetry = "0.17.4"
+tracing-opentelemetry = "0.18.0"
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 url = "2.3.1"
-actix-http = "3.2.2"

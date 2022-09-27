@@ -1,0 +1,30 @@
+[package]
+name = "diesel-tracing"
+version = "0.2.0"
+authors = ["John Children <john@cambridgequantum.com>"]
+license = "MIT"
+edition = "2021"
+description = "Connection telemetry middleware for diesel and tracing"
+repository = "https://github.com/CQCL/diesel-tracing"
+readme = "README.md"
+keywords = ["diesel", "logging", "tracing", "database", "opentelemetry"]
+
+[badges]
+maintenance = { status = "experimental" }
+
+[features]
+default = []
+
+mysql = ["diesel/mysql"]
+postgres = ["diesel/postgres"]
+sqlite = ["diesel/sqlite"]
+
+r2d2 = ["diesel/r2d2"]
+
+[dependencies]
+diesel = { version = "2.0.0", features = ["ipnet-address", "i-implement-a-third-party-backend-and-opt-into-breaking-changes"], default-features = false }
+ipnet = "2.5.0" # this is what diesel uses
+tracing = "0.1.36"
+
+[dev-dependencies]
+diesel = { version = "2.0.0", features = ["mysql", "postgres", "sqlite"] }

@@ -5,7 +5,8 @@ CREATE TABLE users
     username TEXT NOT NULL UNIQUE,
     -- name that can be used to display to the user, smth like "John Doe"
     -- probably we can allow the user to change it
-    name TEXT NOT NULL
+    -- NULL if we haven't received their name yet (can happen when an unknown user is added to the session)
+    name TEXT
 );
 
 CREATE TABLE sessions
@@ -23,5 +24,6 @@ CREATE TABLE marks
     user_id INTEGER NOT NULL REFERENCES users(id),
     session_id INTEGER NOT NULL REFERENCES sessions(id),
     mark_time TIMESTAMP NOT NULL,
-    is_manual BOOLEAN NOT NULL
+    is_manual BOOLEAN NOT NULL,
+    UNIQUE (user_id, session_id)
 );

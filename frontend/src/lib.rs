@@ -25,7 +25,7 @@ async fn index(data: web::Data<StaticData>, req: HttpRequest) -> Result<HttpResp
 
     let path = req.match_info().query("filename");
     let url = data.upstream_url.join(path).unwrap();
-    let url = Uri::from_str(&url.to_string()).unwrap();
+    let url = Uri::from_str(url.as_ref()).unwrap();
 
     let mut client_resp = data.client.get(url).send().await.map_err(ErrorBadGateway)?;
 

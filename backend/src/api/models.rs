@@ -1,6 +1,6 @@
 use crate::db::models as db_models;
 use crate::db::models::SessionId;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -16,10 +16,8 @@ impl From<db_models::Session> for Session {
         Self {
             id: db_session.id,
             title: db_session.title,
-            start_time: db_session.start_time.and_local_timezone(Utc).unwrap(),
-            end_time: db_session
-                .end_time
-                .map(|t| t.and_local_timezone(Utc).unwrap()),
+            start_time: Utc.from_utc_datetime(&db_session.start_time),
+            end_time: db_session.end_time.map(|dt| Utc.from_utc_datetime(&dt)),
         }
     }
 }
@@ -27,6 +25,11 @@ impl From<db_models::Session> for Session {
 #[derive(Serialize, Deserialize)]
 pub struct NewSession {
     pub title: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GetSession {
+    pub session_id: SessionId,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -43,11 +46,36 @@ pub struct SessionWithMarks {
     pub attendance_marks: Vec<AttendanceMark>,
 }
 
+impl From<db_models::SessionWithMarks> for SessionWithMarks {
+    fn from((session, marks, users): db_models::SessionWithMarks) -> Self {
+        Self {
+            id: session.id,
+            title: session.title,
+            start_time: Utc.from_utc_datetime(&session.start_time),
+            end_time: session.end_time.map(|dt| Utc.from_utc_datetime(&dt)),
+            attendance_marks: marks
+                .into_iter()
+                .map(|(_, mark)| AttendanceMark {
+                    username: users.get(&mark.user_id).unwrap().username.clone(),
+                    mark_time: Utc.from_utc_datetime(&mark.mark_time),
+                    is_manual: mark.is_manual,
+                })
+                .collect(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct AttendanceMark {
     pub username: String,
     pub mark_time: DateTime<Utc>,
     pub is_manual: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AttendanceMarkRef {
+    pub session_id: SessionId,
+    pub username: String,
 }
 
 /// This is a login request used only for testing

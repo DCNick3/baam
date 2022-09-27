@@ -1,6 +1,6 @@
 pub mod auth;
 pub mod error;
-mod models;
+pub mod models;
 mod sessions;
 mod sso;
 
@@ -83,13 +83,20 @@ pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> 
     let auth = auth::configure(keys)?;
 
     Ok(move |cfg: &mut ServiceConfig| {
-        cfg.service(hello)
+        cfg
+            // testing
+            .service(hello)
             .service(ping)
             .service(echo)
+            .service(make_error)
+            // sessions
             .service(sessions::get_sessions)
             .service(sessions::create_session)
+            .service(sessions::get_session)
             .service(sessions::delete_session)
-            .service(make_error)
+            .service(sessions::add_mark)
+            .service(sessions::delete_mark)
+            // auth
             .service(login)
             .service(me)
             .configure(auth.clone())
