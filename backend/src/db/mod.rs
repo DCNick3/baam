@@ -10,8 +10,9 @@ use anyhow::{Context, Result};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
-use diesel::{Connection as DieselConnection, PgConnection};
+use diesel::Connection as DieselConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel_tracing::pg::InstrumentedPgConnection;
 use r2d2::PooledConnection;
 use std::collections::HashMap;
 use tracing::{info, instrument, Span};
@@ -35,13 +36,14 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 pub type DbData = actix_web::web::Data<Addr<DbExecutor>>;
 
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
-type Connection = PooledConnection<ConnectionManager<PgConnection>>;
+type Pool = r2d2::Pool<ConnectionManager<InstrumentedPgConnection>>;
+type Connection = PooledConnection<ConnectionManager<InstrumentedPgConnection>>;
 
 #[derive(Clone)]
 pub struct DbExecutor(Pool);
 
 impl DbExecutor {
+    #[instrument(skip(database_url))]
     pub fn new(database_url: &str) -> Result<Self> {
         let pool =
             Pool::new(ConnectionManager::new(database_url)).context("Failed to create pool")?;

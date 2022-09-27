@@ -2,6 +2,7 @@
 members = [
     "backend",
     "frontend",
+    "diesel-tracing",
 ]
 
 [profile.ship]

@@ -8,12 +8,14 @@ edition = "2021"
 baam-frontend = { path = "../frontend" }
 
 actix = "0.13.0"
+actix-http = "3.2.2"
 actix-web = "4.2.1"
 anyhow = "1.0.64"
 chrono = { version = "0.4.22", features = ["serde"] }
 config = "0.13.2"
 derive_more = "0.99.17"
 diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
+diesel-tracing = { path = "../diesel-tracing", features = ["postgres", "r2d2"] }
 diesel_migrations = { version = "2.0.0", features = ["postgres"] }
 ed25519-dalek = "1.0.1"
 enum_dispatch = "0.3.8"
@@ -33,4 +35,3 @@ tracing-actix-web = { version = "0.6.0", features = ["opentelemetry_0_17"] }
 tracing-opentelemetry = "0.17.4"
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 url = "2.3.1"
-actix-http = "3.2.2"
