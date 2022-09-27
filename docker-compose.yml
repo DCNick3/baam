@@ -12,6 +12,10 @@ services:
         source: ./frontend
         target: /app
     command: npm run dev -- --host 0.0.0.0
+    ports:
+      # expose frontend port for websocket connection
+      # (backend can't ¿yet? proxy it)
+      - "5173:5173"
   backend:
     build: .
     environment:
