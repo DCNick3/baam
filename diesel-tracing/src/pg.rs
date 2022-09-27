@@ -243,26 +243,17 @@ fn dump_query<Q: QueryFragment<Pg>>(query: &Q) -> (String, String) {
     (query_str, operation)
 }
 
-// impl<Changes, Output> UpdateAndFetchResults<Changes, Output> for InstrumentedPgConnection
-// where
-//     Changes: Copy + AsChangeset<Target = <Changes as HasTable>::Table> + IntoUpdateTarget,
-//     Update<Changes, Changes>: LoadQuery<PgConnection, Output>,
-// {
-//     fn update_and_fetch(&mut self, changeset: Changes) -> QueryResult<Output> {
-//         debug!("updating and fetching changeset");
-//         self.inner.update_and_fetch(changeset)
+// Commented out because it requires a whole dayabase to run the test
+// not that easy to do in CI
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//
+//     #[test]
+//     fn test_get_info_on_establish() {
+//         InstrumentedPgConnection::establish(
+//             &std::env::var("DATABASE_URL").expect("no postgresql env var specified"),
+//         )
+//         .expect("failed to establish connection or collect info");
 //     }
 // }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_get_info_on_establish() {
-        InstrumentedPgConnection::establish(
-            &std::env::var("DATABASE_URL").expect("no postgresql env var specified"),
-        )
-        .expect("failed to establish connection or collect info");
-    }
-}
