@@ -61,3 +61,19 @@ You can also run the backend in `front-dev` mode and access the frontend at http
 ENVIRONMENT=front-dev DATABASE_URL=postgres://postgres@localhost/postgres \
   cargo run
 ```
+
+### Docker compose (development only)
+
+Compose configuration mounts `frontend` folder to frontend container. The intention is to apply code changes in runtime.
+
+#### Instructions
+
+First make sure to have `npm` dependencies installed (`npm install` in `frontend` folder).
+
+Then run
+
+```bash
+docker compose up
+```
+
+The server should be accessible on `localhost:8080`.

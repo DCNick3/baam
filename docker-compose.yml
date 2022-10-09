@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  frontend:
+    build: frontend
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+    command: npm run dev -- --host 0.0.0.0
+    ports:
+      # expose frontend port for websocket connection
+      # (backend can't ¿yet? proxy it)
+      - "5173:5173"
+  backend:
+    build: .
+    environment:
+      - ENVIRONMENT=dev
+      - DATABASE_URL=postgres://postgres@db/postgres
+      - OTEL_EXPORTER_OTLP_ENDPOINT=https://jaeger:4317
+    volumes:
+      - type: bind
+        source: ./config.docker-dev.yml
+        target: /config.dev.yml
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - frontend
+      - jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    expose:
+      # OTLP collector endpoint
+      - "4317"
+    environment:
+      # enable OTLP collector
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      # web ui
+      - "16686:16686"
