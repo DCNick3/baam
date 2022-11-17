@@ -6,7 +6,9 @@
 	import Navbar from '$lib/navbar.svelte';
 </script>
 
-<Navbar />
-<body>
-	<slot />
-</body>
+<div class="flex flex-col h-full">
+	<Navbar />
+	<div class="flex-grow">
+		<slot />
+	</div>
+</div>

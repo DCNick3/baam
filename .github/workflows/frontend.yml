@@ -24,7 +24,7 @@ jobs:
       - name: Node packages
         if: steps.node_modules_cache.outputs.cache-hit != 'true'
         working-directory: ./frontend
-        run: npm install
+        run: yarn install --frozen-lockfile
 
       - name: Playwright browser
         if: steps.playwright_cache.outputs.cache-hit != 'true'
@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euxo pipefail
 
-          npm run lint
-          npm run check
+          yarn lint
+          yarn check
 
-          npm run test
+          yarn test

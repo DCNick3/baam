@@ -20,6 +20,7 @@ fn change_detection() {
         starts_with(package_json_dir.join(".svelte-kit")),
         equal(package_json_dir.join("package.json")),
         equal(package_json_dir.join("package-lock.json")),
+        equal(package_json_dir.join("yarn.lock")),
         starts_with(target_dir),
         func(move |p| { p.is_file() && p.parent() != Some(package_json_dir.as_path()) })
     );
