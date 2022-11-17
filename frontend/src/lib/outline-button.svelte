@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let type: string;
-	let button_style: string = '';
+	let button_style = '';
 	switch (type) {
 		case 'Primary':
 			button_style = 'border-blue-500 text-blue-500 hover:bg-blue-500';
@@ -8,6 +8,7 @@
 		case 'Secondary':
 			button_style = 'border-slate-600 text-slate-600 hover:bg-slate-600';
 			break;
+
 		case 'Success':
 			button_style = 'border-green-500 text-green-500 hover:bg-green-500';
 			break;

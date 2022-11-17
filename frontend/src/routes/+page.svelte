@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Button from '$lib/button.svelte';
 </script>
 
 <div class="flex flex-col h-[93vh] w-full mt-[-0.5rem]">

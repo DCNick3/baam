@@ -1,13 +1,11 @@
 <script lang="ts">
-	let alert = false;
 	import Sessionname from '$lib/sessionname.svelte';
 	import StudentsList from '$lib/students-list.svelte';
-	import Button from '$lib/button.svelte';
 	import OutlineButton from '$lib/outline-button.svelte';
 
 	import { Student } from '$lib/student.js';
 
-	const students: Array<Student> = Array();
+	const students: Array<Student> = [];
 	students[0] = new Student('', 'n.strygin@innopolis.university');
 	students[1] = new Student('', 'vy.sergeev@innopolis.university');
 	students[2] = new Student('', 'n.strygin@innopolis.university');

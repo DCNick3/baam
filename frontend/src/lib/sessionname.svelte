@@ -1,4 +1,4 @@
-<script lang ts>
+<script lang="ts">
 	let name = 'Untitled Attendance Session';
 	let style_classes = '';
 	let interrupt = false;

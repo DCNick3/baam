@@ -1,5 +1,4 @@
 <script lang="ts">
-	import OutlineButton from '../lib/outline-button.svelte';
 	import NavLinks from '../lib/nav-links.svelte';
 	import NavLogin from '../lib/nav-login.svelte';
 </script>

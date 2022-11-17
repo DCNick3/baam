@@ -10,7 +10,7 @@
 	sessions[5] = new Session(6, '27 Oct, 18:43', 'Frontend Workshop', 6);
 	sessions[6] = new Session(7, '27 Oct, 18:43', 'Frontend Workshop', 1000);
 	sessions[7] = new Session(8, '27 Oct, 18:43', 'Frontend Workshop', 1001);
-	let selection: Array<Boolean> = [];
+	let selection: Array<boolean> = [];
 </script>
 
 <div class="flex flex-row justify-center w-full text-left">

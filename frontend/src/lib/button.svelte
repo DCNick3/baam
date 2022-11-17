@@ -1,8 +1,8 @@
 <script lang="ts">
 	export let type: string;
-	export let disabled: boolean = false;
+	export let disabled = false;
 
-	let button_style: string = '';
+	let button_style = '';
 	switch (type) {
 		case 'Primary':
 			button_style = 'bg-blue-700 enabled:hover:bg-blue-800 border-blue-900';

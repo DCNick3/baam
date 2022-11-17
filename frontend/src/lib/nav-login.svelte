@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import OutlineButton from '../lib/outline-button.svelte';
 </script>
 
