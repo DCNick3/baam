@@ -1,11 +1,11 @@
 <script lang="ts">
   import InlineSVG from 'svelte-inline-svg';
 
-  export let name;
+  export let name: string;
   export let size = '3xl';
   export let focusable = false;
 
-  const sizes = {
+  const sizes: { [key: string]: string } = {
     '3xl': '1.875rem',
     '4xl': '2.5rem',
     '5xl': '3.125rem',
@@ -39,7 +39,11 @@
       src: session_list
     }
   ];
-  let displayIcon = icons.find((e) => e.name === name);
+  let displayIcon =
+    icons.find((e) => e.name === name) ??
+    (function () {
+      throw new Error(`Icon with name ${name} was not found`);
+    })();
 </script>
 
 <InlineSVG
