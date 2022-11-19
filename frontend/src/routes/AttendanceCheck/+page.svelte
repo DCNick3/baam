@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Sessionname from '$lib/sessionname.svelte';
-	import StudentsList from '$lib/students-list.svelte';
-	import OutlineButton from '$lib/outline-button.svelte';
+	import Sessionname from '$lib/SessionName.svelte';
+	import StudentsList from '$lib/StudentsList.svelte';
+	import OutlineButton from '$lib/OutlineButton.svelte';
 
 	import { Student } from '$lib/student.js';
 

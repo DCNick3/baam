@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Student } from '$lib/student.js';
-	import Button from './button.svelte';
+	import Button from './Button.svelte';
 	export let students: Array<Student> = [];
 </script>
 

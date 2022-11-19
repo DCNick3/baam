@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/button.svelte';
+	import Button from '$lib/Button.svelte';
 	import { Session } from '$lib/session.js';
 	let sessions: Array<Session> = [];
 	sessions[0] = new Session(1, '27 Oct, 18:43', 'Frontend Workshop', 30);

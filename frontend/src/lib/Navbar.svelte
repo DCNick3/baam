@@ -1,6 +1,6 @@
 <script lang="ts">
-	import NavLinks from '../lib/nav-links.svelte';
-	import NavLogin from '../lib/nav-login.svelte';
+	import NavLinks from './NavLinks.svelte';
+	import NavLogin from './NavLogin.svelte';
 </script>
 
 <div class="flex selection:flex-row border-b shadow-md border-slate-300 z-10">

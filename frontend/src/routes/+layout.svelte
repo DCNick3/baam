@@ -3,7 +3,7 @@
 	export const prerender = false;
 	export const ssr = false;
 
-	import Navbar from '$lib/navbar.svelte';
+	import Navbar from '$lib/Navbar.svelte';
 </script>
 
 <div class="flex flex-col h-full">

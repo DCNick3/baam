@@ -1,5 +1,5 @@
 <script lang="ts">
-	import OutlineButton from '../lib/outline-button.svelte';
+	import OutlineButton from './OutlineButton.svelte';
 </script>
 
 <div class="flex flex-col md:flex-row w-fit">

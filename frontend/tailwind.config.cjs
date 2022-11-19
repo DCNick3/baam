@@ -14,7 +14,7 @@ module.exports = {
 					position: 'relative',
 					'&::after': {
 						display: 'block',
-						content: '\'\'',
+						content: "''",
 						width: '100%',
 						height: '1px',
 						bottom: '0',
@@ -22,13 +22,13 @@ module.exports = {
 						'background-color': 'rgb(203 213 225)',
 						transition: 'transform 0.15s ease-out',
 						transform: 'scaleX(0)',
-						transformOrigin: 'bottom',
+						transformOrigin: 'bottom'
 					},
 					'&:hover::after': {
-						transform: 'scaleX(1)',
+						transform: 'scaleX(1)'
 					}
 				}
-			})
+			});
 		})
 	]
 };

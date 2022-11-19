@@ -1,5 +1,5 @@
 <script lang="ts">
-	import NavItem from './nav-item.svelte';
+	import NavItem from './NavItem.svelte';
 </script>
 
 <div class="flex flex-row w-fit">

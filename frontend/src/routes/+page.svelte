@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BaamIcon from '$lib/baam-icon.svelte';
+	import BaamIcon from '$lib/BaamIcon.svelte';
 </script>
 
 <div class="flex flex-col h-full w-full">
