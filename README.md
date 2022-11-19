@@ -14,7 +14,7 @@
   - `libssl-dev` and `libpq-dev` on Debian/Ubuntu
   - `openssl-devel` and `postgresql-devel` on Fedora
   - `openssl` and `postgresql` on macOS (via [brew](https://brew.sh/))
-- npm and nodejs installed.
+- npm, nodejs and yarn installed.
 - docker installed for running the database.
 
 ### Building
@@ -43,14 +43,14 @@ ENVIRONMENT=dev DATABASE_URL=postgres://postgres@localhost/postgres \
 First install the dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
 To start the frontend development server, run:
 
 ```bash
 cd frontend
-npm run dev 
+yarn dev 
 ```
 
 Now you can access the frontend at http://localhost:5173/.

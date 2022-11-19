@@ -1,10 +1,15 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173
-	}
+  webServer: {
+    command: 'yarn build && yarn preview',
+    url: 'https://localhost:4173/',
+    ignoreHTTPSErrors: true
+  },
+  use: {
+    baseURL: 'https://localhost:4173/',
+    ignoreHTTPSErrors: true
+  }
 };
 
 export default config;

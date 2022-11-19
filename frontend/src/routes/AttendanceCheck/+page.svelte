@@ -1,28 +1,57 @@
 <script lang="ts">
-	import Sessionname from '$lib/sessionname.svelte';
-	import StudentsList from '$lib/students-list.svelte';
-	import OutlineButton from '$lib/outline-button.svelte';
+  import Button from '$lib/Button.svelte';
+  import SessionFeed from '$lib/SessionFeed.svelte';
 
-	import { Student } from '$lib/student.js';
+  import { Student } from '$lib/student.js';
 
-	const students: Array<Student> = [];
-	students[0] = new Student('', 'n.strygin@innopolis.university');
-	students[1] = new Student('', 'vy.sergeev@innopolis.university');
-	students[2] = new Student('', 'n.strygin@innopolis.university');
-	students[3] = new Student('', 'n.strygin@innopolis.university');
-	students[4] = new Student('', 'n.strygin@innopolis.university');
-	students[5] = new Student('', 'n.strygin@innopolis.university');
+  const students: Array<Student> = [];
+  students[0] = new Student('', 'n.strygin@innopolis.university');
+  students[1] = new Student('', 'vy.sergeev@innopolis.university');
+  students[2] = new Student('', 'n.strygin@innopolis.university');
+  students[3] = new Student('', 'n.strygin@innopolis.university');
+  students[4] = new Student('', 'n.strygin@innopolis.university');
+  students[5] = new Student('', 'n.strygin@innopolis.university');
+  students[6] = new Student('', 'n.strygin@innopolis.university');
+  students[7] = new Student('', 'n.strygin@innopolis.university');
+  students[8] = new Student('', 'n.strygin@innopolis.university');
+  students[9] = new Student('', 'n.strygin@innopolis.university');
+  students[10] = new Student('', 'n.strygin@innopolis.university');
+  students[11] = new Student('', 'n.strygin@innopolis.university');
+  students[12] = new Student('', 'n.strygin@innopolis.university');
+  students[13] = new Student('', 'n.strygin@innopolis.university');
+  students[14] = new Student('', 'n.strygin@innopolis.university');
+  students[15] = new Student('', 'n.strygin@innopolis.university');
+  students[16] = new Student('', 'n.strygin@innopolis.university');
+  students[17] = new Student('', 'n.strygin@innopolis.university');
+  students[18] = new Student('', 'n.strygin@innopolis.university');
+  students[19] = new Student('', 'n.strygin@innopolis.university');
+  students[20] = new Student('', 'n.strygin@innopolis.university');
+  students[21] = new Student('', 'n.strygin@innopolis.university');
+  students[22] = new Student('', 'n.strygin@innopolis.university');
+  students[23] = new Student('', 'n.strygin@innopolis.university');
+
+  let qr_enabled = true;
+  function flipState() {
+    console.log('USED');
+    qr_enabled = !qr_enabled;
+  }
 </script>
 
-<div class="flex flex-col h-[90vh]">
-	<div class="flex-grow grid grid-flow-row grid-cols-2">
-		<div class="flex flex-col">
-			<div class="flex flex-row">
-				<OutlineButton class="m-2 mb-4" type="Danger">Scrap</OutlineButton>
-				<Sessionname class="flex-grow mr-2" />
-			</div>
-			<StudentsList class="flex-grow" {students} />
-		</div>
-		<div class="flex flex-col" />
-	</div>
+<div class="flex flex-col h-full max-h-full">
+  <div class="flex-grow flex flex-row">
+    <div class="flex flex-grow min-w-max w-1/2 pl-5 pt-2 pb-10 max-h-[85%]">
+      <SessionFeed {students} />
+    </div>
+    <div class="flex flex-col w-1/2">
+      {#if qr_enabled}
+        <div class="w-full pt-4 pr-5">
+          <Button class="w-full" type="Primary" on:click={flipState}>Finish showing QR code</Button>
+        </div>
+      {:else}
+        <div class="w-full pt-4 pr-5">
+          <Button class="w-full" type="Secondary" on:click={flipState}>Show QR code</Button>
+        </div>
+      {/if}
+    </div>
+  </div>
 </div>
