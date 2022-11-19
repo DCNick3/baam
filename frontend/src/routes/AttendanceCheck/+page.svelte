@@ -11,6 +11,24 @@
   students[3] = new Student('', 'n.strygin@innopolis.university');
   students[4] = new Student('', 'n.strygin@innopolis.university');
   students[5] = new Student('', 'n.strygin@innopolis.university');
+  students[6] = new Student('', 'n.strygin@innopolis.university');
+  students[7] = new Student('', 'n.strygin@innopolis.university');
+  students[8] = new Student('', 'n.strygin@innopolis.university');
+  students[9] = new Student('', 'n.strygin@innopolis.university');
+  students[10] = new Student('', 'n.strygin@innopolis.university');
+  students[11] = new Student('', 'n.strygin@innopolis.university');
+  students[12] = new Student('', 'n.strygin@innopolis.university');
+  students[13] = new Student('', 'n.strygin@innopolis.university');
+  students[14] = new Student('', 'n.strygin@innopolis.university');
+  students[15] = new Student('', 'n.strygin@innopolis.university');
+  students[16] = new Student('', 'n.strygin@innopolis.university');
+  students[17] = new Student('', 'n.strygin@innopolis.university');
+  students[18] = new Student('', 'n.strygin@innopolis.university');
+  students[19] = new Student('', 'n.strygin@innopolis.university');
+  students[20] = new Student('', 'n.strygin@innopolis.university');
+  students[21] = new Student('', 'n.strygin@innopolis.university');
+  students[22] = new Student('', 'n.strygin@innopolis.university');
+  students[23] = new Student('', 'n.strygin@innopolis.university');
 
   let qr_enabled = true;
   function flipState() {
@@ -19,9 +37,9 @@
   }
 </script>
 
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full max-h-full">
   <div class="flex-grow flex flex-row">
-    <div class="flex flex-grow min-w-max w-1/2 pl-5 pt-2 pb-10">
+    <div class="flex flex-grow min-w-max w-1/2 pl-5 pt-2 pb-10 max-h-[85%]">
       <SessionFeed {students} />
     </div>
     <div class="flex flex-col w-1/2">
