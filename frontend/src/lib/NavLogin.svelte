@@ -2,9 +2,9 @@
   import OutlineButton from './OutlineButton.svelte';
 </script>
 
-<div class="flex flex-col md:flex-row w-fit">
-  <p class="m-4 mr-1 mb-1 md:mb-4 text-slate-900">Hello, Nikita Strygin</p>
-  <div class="m-2 mt-0 md:mt-2 flex flex-row justify-end">
+<div class="flex flex-col w-fit">
+  <p class="m-4 mr-1 mb-1 text-slate-900">Hello, Nikita</p>
+  <div class="m-2 mt-0 flex flex-row justify-end">
     <OutlineButton type="Secondary">Logout</OutlineButton>
   </div>
 </div>

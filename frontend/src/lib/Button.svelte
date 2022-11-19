@@ -23,7 +23,7 @@
 
 <button
   {disabled}
-  class="{$$props.class} rounded-md w-fit text-slate-200 border-1 border-b-[1px] border-r-[2px] py-2 px-4 shadow-lg {button_style}"
+  class="{$$props.class} rounded-md w-fit h-fit text-slate-200 border-1 border-b-[1px] border-r-[2px] py-2 px-4 shadow-lg {button_style}"
 >
   <slot />
 </button>
