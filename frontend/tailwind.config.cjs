@@ -4,7 +4,11 @@ const plugin = require('tailwindcss/plugin');
 module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        mask: 'rgba(0, 0, 0, 0.5)'
+      }
+    }
   },
   plugins: [
     plugin(function ({ addComponents, theme }) {

@@ -22,12 +22,12 @@ jobs:
           key: ${{ runner.os }}-playwright
 
       - name: Node packages
-        #if: steps.node_modules_cache.outputs.cache-hit != 'true'
+#        if: steps.node_modules_cache.outputs.cache-hit != 'true'
         working-directory: ./frontend
         run: yarn install --frozen-lockfile
 
       - name: Playwright browser
-        #if: steps.playwright_cache.outputs.cache-hit != 'true'
+#        if: steps.playwright_cache.outputs.cache-hit != 'true'
         working-directory: ./frontend
         run: npx playwright install
 

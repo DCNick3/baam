@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CameraState from '$lib/CameraState.svelte';
+  import CameraViewfinder from '$lib/camera/Camera.svelte';
 </script>
 
-<CameraState />
+<CameraViewfinder />

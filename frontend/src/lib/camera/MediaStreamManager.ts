@@ -97,59 +97,50 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-interface CameraHandlers {
-  close?: () => void;
-  open?: (stream: MediaStream) => void;
-  error?: (where: string, err: Error) => void;
-}
-
 interface InputDeviceInfoExt extends InputDeviceInfo {
   prototype: InputDeviceInfo;
   getCapabilities?(): MediaTrackCapabilities;
 }
 
-export class Camera {
+export enum MediaStreamManagerErrorKind {
+  NotSupported = 'NotSupported',
+  NoCamera = 'NoCamera',
+  AllDevicesFailed = 'AllDevicesFailed',
+  PermissionDenied = 'PermissionDenied',
+  Other = 'Other'
+}
+
+export class MediaStreamManagerError extends Error {
+  reason?: Error;
+  kind: MediaStreamManagerErrorKind;
+
+  constructor(kind: MediaStreamManagerErrorKind, reason?: Error) {
+    super();
+    this.kind = kind;
+    this.reason = reason;
+  }
+
+  toString() {
+    return `${this.kind}: ${this.reason?.name}: ${this.reason?.message}`;
+  }
+}
+
+export class MediaStreamManager {
   #first_open: boolean;
   #device_list: CameraList;
-  #handlers: CameraHandlers;
   #stream?: MediaStream;
 
   constructor() {
-    this.#handlers = {};
     this.#first_open = true;
     this.#device_list = new CameraList();
   }
 
-  on_open(handler?: (stream: MediaStream) => void) {
-    this.#handlers['open'] = handler;
-  }
-
-  on_close(handler?: () => void) {
-    this.#handlers['close'] = handler;
-  }
-
-  on_error(handler?: (where: string, err: Error) => void) {
-    this.#handlers['error'] = handler;
-  }
-
-  #handle_open(stream: MediaStream) {
-    if (this.#handlers['open']) this.#handlers['open'](stream);
-  }
-  #handle_close() {
-    if (this.#handlers['close']) this.#handlers['close']();
-  }
-  #handle_error(where: string, err: Error) {
-    if (this.#handlers['error']) this.#handlers['error'](where, err);
-  }
-
   get is_supported() {
-    // read end of https://developer.mozilla.org/ru/docs/Web/API/MediaDevices/getUserMedia
+    // read end of https://developer.mozilla.org/en/docs/Web/API/MediaDevices/getUserMedia
     // see https://github.com/xdumaine/enumerateDevices
-    return (
-      'mediaDevices' in navigator &&
-      'getUserMedia' in navigator.mediaDevices &&
-      'enumerateDevices' in navigator.mediaDevices
-    );
+    // typescript magic, because it thinks we are stupid to check for existence of getUserMedia & enumerateDevices
+    const mediaDevices = <{ [key: string]: unknown } | undefined>(<unknown>navigator.mediaDevices);
+    return mediaDevices && mediaDevices.getUserMedia && mediaDevices.enumerateDevices;
   }
 
   get number_of_devices() {
@@ -168,7 +159,6 @@ export class Camera {
     //    Устранить ее самостоятельно не представляется возможным.
     //    Зависание вызывается командой закрытия камеры.
     await sleep(1000);
-    this.#handle_close();
     this.#stream.getTracks().forEach((track) => track.stop());
     this.#stream = undefined;
   }
@@ -184,8 +174,9 @@ export class Camera {
         const error = convert_error(e);
         // On some devices android stack returns an error when we try to reopen the device too fast
         if (error.name === 'AbortError' && i > 0) {
-          this.#handle_error(
-            `get an AbortError. Wait 1000ms before retry ${i + 1}/${repeat}`,
+          // TODO: find a better way to log?
+          console.warn(
+            `[Camera] get an AbortError. Wait 1000ms before retry ${i + 1}/${repeat}`,
             error
           );
           await sleep(1000);
@@ -201,28 +192,37 @@ export class Camera {
   async open_next() {
     await this.close();
 
+    if (!this.is_supported) {
+      throw new MediaStreamManagerError(MediaStreamManagerErrorKind.NotSupported);
+    }
+
     if (this.#first_open) {
       // Open any camera
       try {
-        const stream = await this.getUserMedia({ facingMode: { ideal: 'environment' } }, 0);
-        this.#stream = stream;
-        this.#handle_open(stream);
-        const settings = stream.getTracks()[0].getSettings();
+        this.#stream = await this.getUserMedia({ facingMode: { ideal: 'environment' } }, 0);
+        const settings = this.#stream.getTracks()[0].getSettings();
+
         if (settings.deviceId === undefined) {
           // noinspection ExceptionCaughtLocallyJS
           throw new Error('deviceId is undefined');
         }
 
         this.#device_list.push(settings.deviceId, settings.facingMode === 'environment');
+
+        return this.#stream;
       } catch (e) {
         if (e instanceof Error) {
-          this.#handle_error(`Error while opening any camera`, e);
+          if (e.name === 'NotAllowedError') {
+            throw new MediaStreamManagerError(MediaStreamManagerErrorKind.PermissionDenied, e);
+          } else if (e.name === 'NotFoundError') {
+            throw new MediaStreamManagerError(MediaStreamManagerErrorKind.NoCamera, e);
+          } else {
+            throw new MediaStreamManagerError(MediaStreamManagerErrorKind.Other, e);
+          }
         } else {
           // don't know what to do with unknown error
           throw e;
         }
-        // TODO: Need to somehow work with permission denied
-        return;
       }
     }
 
@@ -256,17 +256,16 @@ export class Camera {
           deviceId: { exact: device_id },
           facingMode: { exact: 'environment' }
         });
-        this.#handle_open(this.#stream);
         this.#device_list.push(device_id, true);
-        return;
+        return this.#stream;
       } catch (e) {
         const error = convert_error(e);
         if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
           this.#device_list.push(device_id, false);
         } else {
           this.#device_list.push(device_id, true);
-          this.#handle_error(
-            `Error while opening environment camera with id=${device_id}. Trying next camera`,
+          console.warn(
+            `[Camera] Error while opening environment camera with id=${device_id}. Trying next camera`,
             error
           );
         }
@@ -278,19 +277,20 @@ export class Camera {
       const device_id = this.#device_list.get_next();
       try {
         this.#stream = await this.getUserMedia({ deviceId: { exact: device_id } });
-        this.#handle_open(this.#stream);
         const settings = this.#stream.getTracks()[0].getSettings();
         this.#device_list.push(device_id, settings.facingMode === 'environment');
-        return;
+        return this.#stream;
       } catch (e) {
         const error = convert_error(e);
 
-        this.#handle_error(
-          `Error while opening camera with id=${device_id}. Trying next camera`,
+        console.warn(
+          `[Camera] Error while opening camera with id=${device_id}. Trying next camera`,
           error
         );
         this.#device_list.push(device_id, false);
       }
     }
+
+    throw new MediaStreamManagerError(MediaStreamManagerErrorKind.AllDevicesFailed, undefined);
   }
 }
