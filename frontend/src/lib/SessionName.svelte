@@ -17,10 +17,10 @@
   const handleBorderStyle = function (state: boolean) {
     if (!state) {
       interrupt = true;
-      style_classes = 'shadow-lg border-gray-300';
+      style_classes = 'shadow-lg border-gray-300 shadow-gray-400 ';
     } else {
       interrupt = true;
-      style_classes = 'duration-150 border-green-300 shadow-lg shadow-green-400';
+      style_classes = 'duration-700 shadow-green-400 border-green-300 shadow-lg ';
       interrupt = false;
       returnToNormalStyle();
     }
@@ -38,11 +38,11 @@
 </script>
 
 <div
-  class="{$$props.class} flex flex-row border-[1px] transition-all ease-out shadow-gray-400 mb-4 mt-2 {style_classes}"
+  class="{$$props.class} {style_classes} flex flex-row border-[1px] transition-all ease-out mb-4 mt-2 min-w-[324px]"
 >
-  <div class="p-2 bg-gray-200 text-gray-800">Session name</div>
+  <div class="p-2 bg-gray-200 text-gray-800 min-w-max">Session name</div>
   <input
-    class="pl-2 border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow"
+    class="pl-2 border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow overflow-auto"
     type="text"
     on:input={handleInput}
   />

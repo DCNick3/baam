@@ -10,41 +10,56 @@
   sessions[5] = new Session(6, '27 Oct, 18:43', 'Frontend Workshop', 6);
   sessions[6] = new Session(7, '27 Oct, 18:43', 'Frontend Workshop', 1000);
   sessions[7] = new Session(8, '27 Oct, 18:43', 'Frontend Workshop', 1001);
-  let selection: Array<boolean> = [];
+  let selection: Array<number> = [];
+
+  $: allSelected = sessions.length === selection.length;
+
+  function check_all_boxes() {
+    if (allSelected) {
+      selection = [];
+    } else {
+      selection = [];
+      sessions.forEach((ses) => {
+        selection.push(ses.id);
+      });
+    }
+  }
 </script>
 
 <div class="flex flex-row justify-center w-full text-left">
-  <div class="flex flex-col w-4/5 mt-3">
-    {#if selection.length > 0}
-      <div
-        class="grid grid-flow-row border-t-[1px] grid-cols-[5%_95%] border-gray-300 text-slate-800"
+  <div class="flex flex-col sm:w-4/5 mt-3">
+    <div class="flex flex-row border-gray-300 text-slate-800">
+      <label
+        class="lbl-checkbox p-[10px] pl-[15px] pr-[15px] mt-4 mb-4 pt-2 pb-3 rounded-full hover:odd:bg-neutral-50"
       >
-        <div class="p-3" />
-        <div class="flex flex-row">
-          <div class="p-3"><Button type="Primary">Export {selection.length} sessions</Button></div>
-          <div class="p-3 pl-0">
+        <input
+          aria-label="Select all sessions"
+          type="checkbox"
+          checked={allSelected}
+          on:change={check_all_boxes}
+        />
+      </label>
+      <div class="flex flex-row">
+        {#if selection.length > 0}
+          <div class="p-3 min-w-max">
+            <Button type="Primary">Export {selection.length} sessions</Button>
+          </div>
+          <div class="p-3 min-w-max pl-0">
             <Button type="Primary">Delete {selection.length} sessions</Button>
           </div>
-        </div>
-      </div>
-    {:else}
-      <div
-        class="grid grid-flow-row border-t-[1px] grid-cols-[5%_95%] border-gray-300 text-slate-800"
-      >
-        <div class="p-3" />
-        <div class="flex flex-row">
-          <div class="p-3">
+        {:else}
+          <div class="p-3 min-w-max">
             <Button disabled={true} type="Secondary">Export {selection.length} sessions</Button>
           </div>
-          <div class="p-3 pl-0">
+          <div class="p-3 min-w-max pl-0">
             <Button disabled={true} type="Secondary">Delete {selection.length} sessions</Button>
           </div>
-        </div>
+        {/if}
       </div>
-    {/if}
+    </div>
     {#each sessions as session}
       <div
-        class="grid grid-flow-row grid-cols-[5%_15%_72%_8%] even:border-t-[1px] even:border-b-[1px] last:border-b-[1px] border-gray-300 text-slate-800"
+        class="flex flex-row even:border-t-[1px] even:border-b-[1px] last:border-b-[1px] border-gray-300 text-slate-800"
       >
         <div class="mt-[14px]">
           <label
@@ -58,9 +73,12 @@
             />
           </label>
         </div>
-        <span class="p-3 mt-[3px] text-md">{session.date}</span>
-        <span class="p-3 text-lg">{session.title}</span>
-        <span class="p-3 mt-[7px] text-sm text-slate-500">{session.numberOfStudents} ppl.</span>
+        <span class="p-3 mt-[3px] text-md min-w-max">{session.date}</span>
+        <div class="p-3 text-lg overflow-scroll min-w-[200px]">{session.title}</div>
+        <div class="flex-grow" />
+        <div class="p-3 mt-[7px] text-sm text-slate-500 min-w-[100px] text-right">
+          {session.numberOfStudents} ppl.
+        </div>
       </div>
     {/each}
   </div>

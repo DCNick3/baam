@@ -1,7 +1,5 @@
 <script lang="ts">
-  import Sessionname from '$lib/SessionName.svelte';
-  import StudentsList from '$lib/StudentsList.svelte';
-  import OutlineButton from '$lib/OutlineButton.svelte';
+  import SessionFeed from '$lib/SessionFeed.svelte';
 
   import { Student } from '$lib/student.js';
 
@@ -15,14 +13,10 @@
 </script>
 
 <div class="flex flex-col h-[90vh]">
-  <div class="flex-grow grid grid-flow-row grid-cols-2">
-    <div class="flex flex-col">
-      <div class="flex flex-row">
-        <OutlineButton class="m-2 mb-4" type="Danger">Scrap</OutlineButton>
-        <Sessionname class="flex-grow mr-2" />
-      </div>
-      <StudentsList class="flex-grow" {students} />
+  <div class="flex-grow flex flex-row">
+    <div class="flex flex-grow min-w-max w-1/2 pl-5 pt-2">
+      <SessionFeed {students} />
     </div>
-    <div class="flex flex-col" />
+    <div class="flex flex-col w-1/2" />
   </div>
 </div>
