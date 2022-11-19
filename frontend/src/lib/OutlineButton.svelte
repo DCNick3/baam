@@ -1,5 +1,7 @@
 <script lang="ts">
   export let type: string;
+  export let disabled = false;
+
   let button_style = '';
   switch (type) {
     case 'Primary':
@@ -21,6 +23,8 @@
 </script>
 
 <button
+  on:click
+  {disabled}
   class="{$$props.class} rounded-md w-fit h-fit bg-opacity-0 transition ease-in-out duration-400 border py-2 px-4 {button_style} hover:text-slate-200"
 >
   <slot />

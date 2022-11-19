@@ -22,6 +22,7 @@
 </script>
 
 <button
+  on:click
   {disabled}
   class="{$$props.class} rounded-md w-fit h-fit text-slate-200 border-1 border-b-[1px] border-r-[2px] py-2 px-4 shadow-lg {button_style}"
 >
