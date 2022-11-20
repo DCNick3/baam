@@ -5,7 +5,7 @@
 </script>
 
 <div
-  class="{$$props.class} flex ml-2 mr-2 flex-col border-[1px] border-gray-300 rounded-t-md rounded-b-md min-w-max max-h-full"
+  class="{$$props.class} flex ml-2 mr-2 flex-col border-[1px] border-gray-300 rounded-t-md rounded-b-md max-h-full min-h-[140px]"
 >
   <ul class="flex-grow-0 flex-shrink overflow-y-scroll">
     {#each students as student, i}

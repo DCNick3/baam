@@ -38,6 +38,7 @@
   }
   let qr_code_data = '';
   function construct_qr_data(session_code: string) {
+    console.log(session_code);
     qr_code_data = 'https://baam.duckdns.com/s#' + session_code;
   }
   let sess_time = new SessionCodeTimer('YNxExINfvxmC0q6g', 12, new Date(), 1000, construct_qr_data);
@@ -46,21 +47,22 @@
   onDestroy(() => sess_time.stop());
 </script>
 
-<div class="grid lg:grid-cols-[minmax(min-content,_50em)_minmax(30em,_1fr)] h-full">
-  <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3">
+<div class="grid lg:grid-cols-[minmax(min-content,_43em)_minmax(30em,_1fr)] h-full max-h-full">
+  <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3 h-full max-h-full overflow-hidden">
     <SessionFeed {students} />
   </div>
-  <div class="flex flex-col lg:block">
+  <div class="flex flex-col h-100% overflow-hidden">
     {#if qr_enabled}
-      <div class="w-full pt-4 pr-5">
-        <Button class="w-full" type="Primary" on:click={flipState}>Finish showing QR code</Button>
+      <div class="w-full pt-4 pr-5 mb-3">
+        <Button class="w-[100%]" type="Primary" on:click={flipState}>Finish showing QR code</Button>
       </div>
-      <div>
+      <!-- !!!DO NOT ADD ANY MORE WRAPPERS. It breaks vertical QR code resizing! -->
+      <div class="w-full contents mb-10">
         <QRcode qr_data={qr_code_data} />
       </div>
     {:else}
       <div class="w-full pt-4 pr-5">
-        <Button class="w-full" type="Secondary" on:click={flipState}>Show QR code</Button>
+        <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
       </div>
     {/if}
   </div>

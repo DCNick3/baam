@@ -90,7 +90,11 @@ export default class SessionCodeTimer {
     code = WordArray.create(code.words.slice(this.bytes_to_slice));
     code = code.concat(this.efficientEncodeToWordArray(this.sess_id));
     code = code.concat(this.efficientEncodeToWordArray(this.counter));
-    const encoded_code = code.toString(CryptoJS.enc.Base64);
+    let encoded_code = code.toString(CryptoJS.enc.Base64);
+    // Make base64 urlsafe
+    encoded_code = encoded_code.replace('+', '-');
+    encoded_code = encoded_code.replace('/', '_');
+    encoded_code = encoded_code.replace('=', '');
     this.callback(encoded_code);
   }
 
