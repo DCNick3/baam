@@ -1,7 +1,8 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
+  import QRcode from '$lib/QRcode.svelte';
   import SessionFeed from '$lib/SessionFeed.svelte';
-
+  import SessionCodeTimer from '$lib/generate_session_code';
   import { Student } from '$lib/student.js';
 
   const students: Array<Student> = [];
