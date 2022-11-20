@@ -38,11 +38,11 @@
 </script>
 
 <div
-  class="{$$props.class} {style_classes} flex flex-row border-[1px] transition-all ease-out mb-4 mt-2 min-w-[324px]"
+  class="{$$props.class} {style_classes} flex flex-row border-[1px] transition-all ease-out mb-4 mt-2 min-w-[150px]"
 >
   <div class="p-2 bg-gray-200 text-gray-800 min-w-max">Session name</div>
   <input
-    class="pl-2 border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow overflow-auto"
+    class="pl-2 border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow min-w-[150px] overflow-auto"
     type="text"
     on:input={handleInput}
   />
