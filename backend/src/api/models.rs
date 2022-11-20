@@ -3,12 +3,13 @@ use crate::db::models::SessionId;
 use chrono::{DateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
+/// Session as seen in the listing
 #[derive(Serialize, Deserialize)]
 pub struct Session {
     pub id: SessionId,
-    pub title: String,
+    pub title: Option<String>,
+    pub active: bool,
     pub start_time: DateTime<Utc>,
-    pub end_time: Option<DateTime<Utc>>,
 }
 
 impl From<db_models::Session> for Session {
@@ -16,15 +17,15 @@ impl From<db_models::Session> for Session {
         Self {
             id: db_session.id,
             title: db_session.title,
+            active: db_session.active,
             start_time: Utc.from_utc_datetime(&db_session.start_time),
-            end_time: db_session.end_time.map(|dt| Utc.from_utc_datetime(&dt)),
         }
     }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct NewSession {
-    pub title: String,
+    pub title: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -37,12 +38,14 @@ pub struct DeleteSession {
     pub session_id: SessionId,
 }
 
+/// Session as seen on attendance check page
 #[derive(Serialize, Deserialize)]
 pub struct SessionWithMarks {
     pub id: SessionId,
-    pub title: String,
+    pub title: Option<String>,
+    pub active: bool,
     pub start_time: DateTime<Utc>,
-    pub end_time: Option<DateTime<Utc>>,
+    pub seed: String,
     pub attendance_marks: Vec<AttendanceMark>,
 }
 
@@ -51,8 +54,9 @@ impl From<db_models::SessionWithMarks> for SessionWithMarks {
         Self {
             id: session.id,
             title: session.title,
+            active: session.active,
             start_time: Utc.from_utc_datetime(&session.start_time),
-            end_time: session.end_time.map(|dt| Utc.from_utc_datetime(&dt)),
+            seed: session.seed,
             attendance_marks: marks
                 .into_iter()
                 .map(|(_, mark)| AttendanceMark {

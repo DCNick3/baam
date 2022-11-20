@@ -27,6 +27,14 @@ Content-Type: application/json
   "title": "Example Session"
 }
 
+### Create an unnamed session
+POST {{base_url}}/api/sessions
+Content-Type: application/json
+
+{
+  "title": null
+}
+
 ### Get sessions
 GET {{base_url}}/api/sessions
 

@@ -27,12 +27,20 @@ async fn create_session(
     req: web::Json<models::NewSession>,
 ) -> ApiResult<web::Json<models::Session>> {
     let req = req.into_inner();
+
+    use rand::{rngs::OsRng, RngCore};
+
+    let mut seed = [0u8; 12];
+    OsRng.fill_bytes(&mut seed);
+    let seed = base64::encode(&seed);
+
     let session = db
         .send(db::CreateSession {
             span: Span::current(),
             owner_id: user.user_id,
             title: req.title,
             start_time: Utc::now().naive_utc(),
+            seed,
         })
         .await??;
 
