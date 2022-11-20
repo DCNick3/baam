@@ -10,7 +10,7 @@ use url::Url;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Config {
     pub upstream: Option<Url>,
 }

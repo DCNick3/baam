@@ -93,13 +93,12 @@ async fn add_mark(
 
     let req = req.into_inner();
     let mark: db::models::AttendanceMark = db
-        .send(db::AddAttendanceMark {
+        .send(db::AddManualAttendanceMark {
             span: Span::current(),
             owner_id: user.user_id,
             session_id: req.session_id,
             student_username: req.username.clone(),
             mark_time: time.naive_utc(),
-            is_manual: true,
         })
         .await??;
 

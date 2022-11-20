@@ -1,2 +1,5 @@
 frontend: {}
 server: {}
+challenge:
+  qr_interval: "1s"
+  jitter_window: "500ms"

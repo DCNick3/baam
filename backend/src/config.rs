@@ -2,10 +2,11 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::net::SocketAddr;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Config {
     pub frontend: Frontend,
     pub server: Server,
+    pub challenge: Challenge,
 }
 
 impl Config {
@@ -31,7 +32,9 @@ impl Config {
 
 pub type Frontend = baam_frontend::Config;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Server {
     pub endpoint: SocketAddr,
 }
+
+pub type Challenge = crate::api::ChallengeConfig;

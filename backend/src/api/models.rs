@@ -93,7 +93,16 @@ pub struct LoginRequest {
 #[derive(Serialize, Deserialize)]
 pub struct User {
     pub username: String,
-    pub name: String,
+    pub name: Option<String>,
+}
+
+impl From<db_models::User> for User {
+    fn from(db_user: db_models::User) -> Self {
+        Self {
+            username: db_user.username,
+            name: db_user.name,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -106,5 +115,6 @@ pub struct Challenge {
 #[serde(tag = "result")]
 pub enum ChallengeResult {
     Success { other_students: Vec<User> },
-    Failure,
+    Invalid,
+    Failed,
 }

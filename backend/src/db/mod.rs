@@ -77,10 +77,17 @@ pub struct GetSessions {
     pub span: Span,
     pub user_id: UserId,
 }
+/// Get session, checking its owner
 #[derive(Debug)]
 pub struct GetSession {
     pub span: Span,
     pub owner_id: UserId,
+    pub session_id: SessionId,
+}
+/// Just get session, without checking its owner
+#[derive(Debug)]
+pub struct LookupSession {
+    pub span: Span,
     pub session_id: SessionId,
 }
 #[derive(Debug)]
@@ -98,13 +105,18 @@ pub struct DeleteSession {
     pub owner_id: UserId,
 }
 #[derive(Debug)]
-pub struct AddAttendanceMark {
+pub struct AddManualAttendanceMark {
     pub span: Span,
     pub session_id: SessionId,
     pub owner_id: UserId,
     pub student_username: String,
-    /// Is this a manual attendance mark or a check-in by a student?
-    pub is_manual: bool,
+    pub mark_time: NaiveDateTime,
+}
+#[derive(Debug)]
+pub struct AddAutoAttendanceMark {
+    pub span: Span,
+    pub session_id: SessionId,
+    pub student_id: UserId,
     pub mark_time: NaiveDateTime,
 }
 #[derive(Debug)]
@@ -229,6 +241,26 @@ impl Handler<GetSession> for DbExecutor {
     }
 }
 
+impl Message for LookupSession {
+    type Result = ApiResult<Option<models::Session>>;
+}
+impl Handler<LookupSession> for DbExecutor {
+    type Result = <LookupSession as Message>::Result;
+
+    #[instrument(name = "LookupSession", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: LookupSession, _: &mut Self::Context) -> Self::Result {
+        use schema::sessions::dsl::*;
+
+        let result = sessions
+            .filter(id.eq(&msg.session_id.0))
+            .first::<models::Session>(&mut self.get_conn()?)
+            .optional()
+            .context("Failed to load session")?;
+
+        Ok(result)
+    }
+}
+
 impl Message for CreateSession {
     type Result = ApiResult<models::Session>;
 }
@@ -283,14 +315,14 @@ impl Handler<DeleteSession> for DbExecutor {
     }
 }
 
-impl Message for AddAttendanceMark {
+impl Message for AddManualAttendanceMark {
     type Result = ApiResult<models::AttendanceMark>;
 }
-impl Handler<AddAttendanceMark> for DbExecutor {
-    type Result = <AddAttendanceMark as Message>::Result;
+impl Handler<AddManualAttendanceMark> for DbExecutor {
+    type Result = <AddManualAttendanceMark as Message>::Result;
 
-    #[instrument(name = "AddAttendanceMark", parent = &msg.span, skip(self))]
-    fn handle(&mut self, msg: AddAttendanceMark, _: &mut Self::Context) -> Self::Result {
+    #[instrument(name = "AddManualAttendanceMark", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: AddManualAttendanceMark, _: &mut Self::Context) -> Self::Result {
         self.get_conn()?.transaction(|conn| -> ApiResult<_> {
             let user = get_or_create_user(conn, &msg.student_username, None)?;
 
@@ -303,7 +335,7 @@ impl Handler<AddAttendanceMark> for DbExecutor {
                     session_id: msg.session_id,
                     user_id: user.id,
                     mark_time: msg.mark_time,
-                    is_manual: msg.is_manual,
+                    is_manual: true,
                 })
                 .on_conflict((session_id, user_id))
                 .do_nothing()
@@ -318,6 +350,45 @@ impl Handler<AddAttendanceMark> for DbExecutor {
                         .first(conn)
                         .context("Failed to load an already existing mark")
                 })?)
+        })
+    }
+}
+
+impl Message for AddAutoAttendanceMark {
+    type Result = ApiResult<(models::AttendanceMark, Vec<models::User>)>;
+}
+impl Handler<AddAutoAttendanceMark> for DbExecutor {
+    type Result = <AddAutoAttendanceMark as Message>::Result;
+
+    #[instrument(name = "AddAutoAttendanceMark", parent = &msg.span, skip(self))]
+    fn handle(&mut self, msg: AddAutoAttendanceMark, _: &mut Self::Context) -> Self::Result {
+        self.get_conn()?.transaction(|conn| -> ApiResult<_> {
+            use schema::marks::dsl::*;
+            let mark = diesel::insert_into(marks)
+                .values(NewAttendanceMark {
+                    session_id: msg.session_id,
+                    user_id: msg.student_id,
+                    mark_time: msg.mark_time,
+                    is_manual: false,
+                })
+                .on_conflict((session_id, user_id))
+                .do_nothing()
+                .get_result(conn)
+                .optional()
+                .context("Failed to insert mark")
+                .transpose()
+                .unwrap_or_else(|| {
+                    marks
+                        .filter(session_id.eq(&msg.session_id.0))
+                        .filter(user_id.eq(&msg.student_id.0))
+                        .first(conn)
+                        .context("Failed to load an already existing mark")
+                })?;
+
+            Ok((
+                mark,
+                vec![], // TODO: return the list of students who were marked before this one
+            ))
         })
     }
 }
