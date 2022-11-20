@@ -5,6 +5,7 @@
     <scripts>
       <script value="dev" />
     </scripts>
+    <arguments value="--host 0.0.0.0" />
     <node-interpreter value="project" />
     <envs />
     <method v="2" />

@@ -18,6 +18,8 @@
   });
 
   function update(video_size, overlay_size) {
+    if (!video_size || !overlay_size) return;
+
     let box_size = {
       width: Math.min(BOX_SIZE.width, video_size.width),
       height: Math.min(BOX_SIZE.height, video_size.height)
