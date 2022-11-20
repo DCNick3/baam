@@ -4,7 +4,6 @@
   import MenuItem from '../lib/MenuItem.svelte';
 
   import BaamBlog from '$lib/BaamBlog.svelte';
-  import BaamIcon from '$lib/BaamIcon.svelte';
 </script>
 
 <div class="flex flex-col h-full w-full">

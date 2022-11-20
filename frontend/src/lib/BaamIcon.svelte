@@ -1,6 +1,4 @@
 <script lang="ts">
-  import InlineSVG from 'svelte-inline-svg';
-
   export let name: string;
   export let size = '3xl';
   export let focusable = false;
@@ -18,39 +16,39 @@
       throw new Error(`Invalid size: ${size}`);
     })();
 
-  import check_in from '$lib/assets/icons/check-in.svg';
-  import new_session from '$lib/assets/icons/new-session.svg';
-  import session_list from '$lib/assets/icons/session-list.svg';
+  import check_in from '~icons/baam/check-in';
+  import new_session from '~icons/baam/new-session';
+  import session_list from '~icons/baam/session-list';
 
   let icons = [
     {
       box: 32,
       name: 'check-in',
-      src: check_in
+      component: check_in
     },
     {
       box: 32,
       name: 'new-session',
-      src: new_session
+      component: new_session
     },
     {
       box: 32,
       name: 'session-list',
-      src: session_list
+      component: session_list
     }
   ];
-  let displayIcon =
+
+  let { component: Component, box } =
     icons.find((e) => e.name === name) ??
     (function () {
       throw new Error(`Icon with name ${name} was not found`);
     })();
 </script>
 
-<InlineSVG
-  src={displayIcon.src}
+<Component
   class={'inline ' + $$props.class}
   {focusable}
   width={real_size}
   height={real_size}
-  viewBox="0 0 {displayIcon.box} {displayIcon.box}"
+  viewBox="0 0 {box} {box}"
 />

@@ -14,11 +14,6 @@ const config = {
       fallback: 'index.html'
     }),
     prerender: { entries: [] }
-  },
-  vite: {
-    ssr: {
-      noExternal: ['svelte-inline-svg']
-    }
   }
 };
 
