@@ -1,8 +1,10 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
+  import QRcode from '$lib/QRcode.svelte';
   import SessionFeed from '$lib/SessionFeed.svelte';
-
+  import SessionCodeTimer from '$lib/generate_session_code.js';
   import { Student } from '$lib/student.js';
+  import { onDestroy } from 'svelte';
 
   const students: Array<Student> = [];
   students[0] = new Student('', 'n.strygin@innopolis.university');
@@ -32,19 +34,29 @@
 
   let qr_enabled = true;
   function flipState() {
-    console.log('USED');
     qr_enabled = !qr_enabled;
   }
+  let qr_code_data = '';
+  function construct_qr_data(session_code: string) {
+    qr_code_data = 'https://baam.duckdns.com/s#' + session_code;
+  }
+  let sess_time = new SessionCodeTimer('YNxExINfvxmC0q6g', 12, new Date(), 1000, construct_qr_data);
+  console.log('Running SessionCodeTimer');
+  sess_time.run();
+  onDestroy(() => sess_time.stop());
 </script>
 
 <div class="grid lg:grid-cols-[minmax(min-content,_50em)_minmax(30em,_1fr)] h-full">
-  <div class="flex flex-grow  pl-5 pt-2 pb-10">
+  <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3">
     <SessionFeed {students} />
   </div>
-  <div class="flex flex-col lg:block hidden">
+  <div class="flex flex-col lg:block">
     {#if qr_enabled}
       <div class="w-full pt-4 pr-5">
         <Button class="w-full" type="Primary" on:click={flipState}>Finish showing QR code</Button>
+      </div>
+      <div>
+        <QRcode qr_data={qr_code_data} />
       </div>
     {:else}
       <div class="w-full pt-4 pr-5">
