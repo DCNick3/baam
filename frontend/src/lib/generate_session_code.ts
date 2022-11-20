@@ -36,7 +36,6 @@ export default class SessionCodeTimer {
     this.t0 = t0.getTime();
     this.tx = tx;
     this.counter = Math.floor((Date.now() - this.t0) / this.tx);
-    console.log(this.counter);
     this.bytes_to_slice = bytes_to_slice;
     this.callback = callback;
     this.timer = new PreciseTimer(() => this.getSessionCode(), this.t0, this.tx);
@@ -80,10 +79,8 @@ export default class SessionCodeTimer {
     }
     const word_array = [];
     for (const word of words) {
-      console.log(word);
       word_array.push(word[3] | (word[2] << 8) | (word[1] << 16) | (word[0] << 24));
     }
-    console.log(x, bytes, word_array);
     return WordArray.create(word_array, bytes.length);
   }
 
@@ -94,11 +91,10 @@ export default class SessionCodeTimer {
     code = code.concat(this.efficientEncodeToWordArray(this.sess_id));
     code = code.concat(this.efficientEncodeToWordArray(this.counter));
     const encoded_code = code.toString(CryptoJS.enc.Base64);
-    console.log(code.toString(CryptoJS.enc.Hex));
     this.callback(encoded_code);
   }
 
   stop() {
-    this.stop();
+    this.timer.stop();
   }
 }
