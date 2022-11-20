@@ -40,6 +40,6 @@ jobs:
           set -euxo pipefail
 
           yarn lint
-          yarn check
+          yarn run check
 
           yarn test

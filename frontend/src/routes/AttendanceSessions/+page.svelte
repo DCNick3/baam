@@ -1,15 +1,9 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
-  import { Session } from '$lib/session.js';
-  let sessions: Array<Session> = [];
-  sessions[0] = new Session(1, '27 Oct, 18:43', 'Frontend Workshop', 30);
-  sessions[1] = new Session(2, '27 Oct, 18:43', 'Frontend Workshop', 35);
-  sessions[2] = new Session(3, '27 Oct, 18:43', 'Frontend Workshop', 26);
-  sessions[3] = new Session(4, '27 Oct, 18:43', 'Frontend Workshop', 10);
-  sessions[4] = new Session(5, '27 Oct, 18:43', 'Frontend Workshop', 1);
-  sessions[5] = new Session(6, '27 Oct, 18:43', 'Frontend Workshop', 6);
-  sessions[6] = new Session(7, '27 Oct, 18:43', 'Frontend Workshop', 1000);
-  sessions[7] = new Session(8, '27 Oct, 18:43', 'Frontend Workshop', 1001);
+  import type { Session } from '$lib/session';
+  export let data: { sessions: Session[] };
+
+  let sessions: Array<Session> = data.sessions;
   let selection: Array<number> = [];
 
   $: allSelected = sessions.length === selection.length;
