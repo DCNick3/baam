@@ -264,7 +264,7 @@ impl Handler<DeleteSession> for DbExecutor {
         self.get_conn()?.transaction(|conn| -> ApiResult<_> {
             {
                 use schema::marks::dsl::*;
-                diesel::delete(marks.filter(id.eq(&msg.session_id.0)))
+                diesel::delete(marks.filter(session_id.eq(&msg.session_id.0)))
                     .execute(conn)
                     .context("Failed to delete session marks")?;
             }
