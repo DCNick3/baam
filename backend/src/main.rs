@@ -119,7 +119,7 @@ async fn main_impl() -> Result<()> {
 
     let database = db::DbExecutor::new(&database_url).context("Connecting to the database")?;
     let database = SyncArbiter::start(3, move || database.clone());
-    let api = api::configure(auth_keys).context("Configuring api")?;
+    let api = api::configure(config.clone(), auth_keys).context("Configuring api")?;
     let frontend = baam_frontend::configure(config.frontend).context("Configuring frontend")?;
 
     info!("Starting server on http://{}/", config.server.endpoint);

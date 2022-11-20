@@ -17,8 +17,10 @@ use std::collections::HashMap;
 use tracing::Span;
 
 use crate::api::auth::UserClaims;
+use crate::config::Config;
 use crate::db;
 pub use auth::AuthKeys;
+pub use challenge::Config as ChallengeConfig;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -72,7 +74,7 @@ async fn login(
 async fn me(user: UserClaims) -> ApiResult<web::Json<models::User>> {
     Ok(web::Json(models::User {
         username: user.username,
-        name: user.name,
+        name: Some(user.name),
     }))
 }
 
@@ -80,7 +82,7 @@ async fn not_found() -> HttpResponse {
     HttpResponse::NotFound().body("Api route handler not found")
 }
 
-pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> {
+pub fn configure(config: Config, keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> {
     let auth = auth::configure(keys)?;
 
     Ok(move |cfg: &mut ServiceConfig| {
@@ -101,7 +103,7 @@ pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> 
             .service(login)
             .service(me)
             // challenge
-            .service(challenge::submit_challenge)
+            .configure(challenge::configure(config.challenge.clone()))
             .configure(auth.clone())
             .default_service(web::route().to(not_found));
     })
