@@ -37,21 +37,19 @@
   }
 </script>
 
-<div class="flex flex-col h-full max-h-full">
-  <div class="flex-grow flex flex-row">
-    <div class="flex flex-grow min-w-max w-1/2 pl-5 pt-2 pb-10 max-h-[85%]">
-      <SessionFeed {students} />
-    </div>
-    <div class="flex flex-col w-1/2">
-      {#if qr_enabled}
-        <div class="w-full pt-4 pr-5">
-          <Button class="w-full" type="Primary" on:click={flipState}>Finish showing QR code</Button>
-        </div>
-      {:else}
-        <div class="w-full pt-4 pr-5">
-          <Button class="w-full" type="Secondary" on:click={flipState}>Show QR code</Button>
-        </div>
-      {/if}
-    </div>
+<div class="grid lg:grid-cols-[minmax(min-content,_50em)_minmax(30em,_1fr)] h-full">
+  <div class="flex flex-grow  pl-5 pt-2 pb-10">
+    <SessionFeed {students} />
+  </div>
+  <div class="flex flex-col lg:block hidden">
+    {#if qr_enabled}
+      <div class="w-full pt-4 pr-5">
+        <Button class="w-full" type="Primary" on:click={flipState}>Finish showing QR code</Button>
+      </div>
+    {:else}
+      <div class="w-full pt-4 pr-5">
+        <Button class="w-full" type="Secondary" on:click={flipState}>Show QR code</Button>
+      </div>
+    {/if}
   </div>
 </div>

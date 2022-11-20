@@ -6,7 +6,7 @@
   import BaamBlog from '$lib/BaamBlog.svelte';
 </script>
 
-<div class="flex flex-col h-full w-full">
+<div class="flex flex-col h-full w-full overflow-y-scroll">
   <div class="flex-grow flex flex-col">
     <div class="w-full flex flex-row justify-center">
       <div class="flex flex-col lg:flex-row lg:justify-center">
