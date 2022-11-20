@@ -13,10 +13,11 @@ diesel::table! {
 diesel::table! {
     sessions (id) {
         id -> Int4,
-        title -> Text,
+        title -> Nullable<Text>,
         owner_id -> Int4,
+        active -> Bool,
         start_time -> Timestamp,
-        end_time -> Nullable<Timestamp>,
+        seed -> Text,
     }
 }
 

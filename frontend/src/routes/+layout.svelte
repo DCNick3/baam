@@ -6,9 +6,9 @@
   import Navbar from '$lib/Navbar.svelte';
 </script>
 
-<div class="grid grid-rows-[auto_minmax(0,_1fr)] h-full">
+<div class="grid grid-rows-[auto_minmax(0,_1fr)] grid-cols-1 w-full h-full">
   <Navbar />
-  <div class="flex-grow">
+  <div class="contents">
     <slot />
   </div>
 </div>

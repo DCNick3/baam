@@ -21,8 +21,8 @@
     canvasCtx = canvas.getContext('2d');
   }
 
-  let video_size: { width: number; height: number } = { width: 10, height: 10 };
-  let wrapper_size: { width: number; height: number } = { width: 10, height: 10 };
+  let video_size: { width: number; height: number } | null = null;
+  let wrapper_size: { width: number; height: number } | null = null;
 
   let resize_observer: ResizeObserver = new ResizeObserver(() => {
     if (!wrapper) return;
@@ -41,15 +41,12 @@
     }
   }
 
-  let letterbox_v = 0;
-  let letterbox_h = 0;
-
   $: {
     // compute the neccessary margin for letterboxing
     // unfortunately, this is not possible with CSS alone, as the browsers are not consistent with video handling,
     // so we have to do it manually
 
-    if (wrapper) {
+    if (wrapper && video_size && wrapper_size) {
       // find the smallest scale factor that fits the video into the wrapper
       const cw = wrapper_size.width / video_size.width;
       const ch = wrapper_size.height / video_size.height;
@@ -61,10 +58,10 @@
       if (scale > 1) scale = 1;
       const pad_x = wrapper_size.width - video_size.width * scale;
       const pad_y = wrapper_size.height - video_size.height * scale;
-      console.log('pad', pad_x, pad_y);
+      console.log('pad', pad_x / 2, pad_y / 2);
 
-      letterbox_v = pad_y / 2;
-      letterbox_h = pad_x / 2;
+      wrapper.style.paddingTop = wrapper.style.paddingBottom = `${pad_y / 2}px`;
+      wrapper.style.paddingLeft = wrapper.style.paddingRight = `${pad_x / 2}px`;
     }
   }
 
@@ -95,7 +92,13 @@
         }
       }
 
-      if (video.videoWidth != video_size.width || video.videoHeight != video_size.height) {
+      if (
+        (!video_size ||
+          video.videoWidth != video_size.width ||
+          video.videoHeight != video_size.height) &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0
+      ) {
         console.log('video size changed', video.videoWidth, video.videoHeight);
         video_size = {
           width: video.videoWidth,
@@ -116,7 +119,7 @@
 </script>
 
 <!-- margin doesn't work for some reason, so use padding -->
-<div class="w-full h-full" style:padding="{letterbox_v}px {letterbox_h}px" bind:this={wrapper}>
+<div class="w-full h-full" bind:this={wrapper}>
   <div class="relative w-fit" bind:this={container}>
     <canvas class="hidden" bind:this={canvas} />
     <!-- svelte-ignore a11y-media-has-caption -->

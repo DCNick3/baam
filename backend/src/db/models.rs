@@ -54,11 +54,12 @@ pub struct NewAttendanceMark {
 pub struct Session {
     #[diesel(deserialize_as = i32)]
     pub id: SessionId,
-    pub title: String,
+    pub title: Option<String>,
     #[diesel(deserialize_as = i32)]
     pub owner_id: UserId,
+    pub active: bool,
     pub start_time: NaiveDateTime,
-    pub end_time: Option<NaiveDateTime>,
+    pub seed: String,
 }
 
 pub type SessionWithMarks = (

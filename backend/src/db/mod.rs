@@ -87,8 +87,9 @@ pub struct GetSession {
 pub struct CreateSession {
     pub span: Span,
     pub owner_id: UserId,
-    pub title: String,
+    pub title: Option<String>,
     pub start_time: NaiveDateTime,
+    pub seed: String,
 }
 #[derive(Debug)]
 pub struct DeleteSession {
@@ -243,6 +244,7 @@ impl Handler<CreateSession> for DbExecutor {
                 owner_id.eq(&msg.owner_id.0),
                 title.eq(&msg.title),
                 start_time.eq(&msg.start_time),
+                seed.eq(&msg.seed),
             ))
             .get_result::<models::Session>(&mut self.get_conn()?)
             .context("Failed to create session")?;
