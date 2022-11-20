@@ -95,3 +95,16 @@ pub struct User {
     pub username: String,
     pub name: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct Challenge {
+    /// Base-64 encoded challenge
+    pub challenge: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "result")]
+pub enum ChallengeResult {
+    Success { other_students: Vec<User> },
+    Failure,
+}

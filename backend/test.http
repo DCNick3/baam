@@ -55,3 +55,11 @@ GET {{base_url}}/api/sessions/1
 
 ### Delete session
 DELETE {{base_url}}/api/sessions/1
+
+### Post a challenge
+POST {{base_url}}/api/challenge
+Content-Type: application/json
+
+{
+  "challenge": "Abracadabra"
+}

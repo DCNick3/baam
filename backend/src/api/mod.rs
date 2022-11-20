@@ -1,4 +1,5 @@
 pub mod auth;
+mod challenge;
 pub mod error;
 pub mod models;
 mod sessions;
@@ -99,6 +100,8 @@ pub fn configure(keys: AuthKeys) -> Result<impl Fn(&mut ServiceConfig) + Clone> 
             // auth
             .service(login)
             .service(me)
+            // challenge
+            .service(challenge::submit_challenge)
             .configure(auth.clone())
             .default_service(web::route().to(not_found));
     })
