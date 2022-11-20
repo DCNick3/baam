@@ -17,9 +17,9 @@
           <!-- reserve some space !-->
           <div class="h-5 md:h-20" />
           <MenuHeader text="Collect Attendance" />
-          <MenuItem text="New session" icon="new-session" />
-          <MenuItem text="Last Session" icon="new-session" />
-          <MenuItem text="All Sessions" icon="session-list" />
+          <MenuItem text="New session" icon="new-session" href="/AttendanceCheck" />
+          <MenuItem text="Last Session" icon="new-session" href="/AttendanceCheck" />
+          <MenuItem text="All Sessions" icon="session-list" href="/AttendanceSessions" />
         </div>
         <div class="lg:w-20" />
         <div
@@ -29,7 +29,7 @@
           <!-- reserve some space !-->
           <div class="lg:h-20" />
           <MenuHeader text="Check In" />
-          <MenuItem text="Scan QR" icon="check-in" />
+          <MenuItem text="Scan QR" icon="check-in" href="/s" />
         </div>
       </div>
     </div>
