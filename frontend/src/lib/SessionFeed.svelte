@@ -7,8 +7,8 @@
   export let students: Array<Student>;
 </script>
 
-<div class="flex flex-col flex-grow">
-  <div class="flex flex-row min-w-max">
+<div class="flex flex-col flex-grow w-full">
+  <div class="flex flex-row">
     <OutlineButton class="m-2 mb-4" type="Danger">Scrap</OutlineButton>
     <Sessionname class="flex-grow mr-2" />
   </div>

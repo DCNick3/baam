@@ -79,7 +79,7 @@
           <div class="flex-grow">
             <div class="flex flex-row">
               <span class="p-3 mt-[3px] text-md min-w-max">{session.date}</span>
-              <div class="p-3 text-lg overflow-scroll min-w-[200px] sm:block hidden">
+              <div class="p-3 text-lg overflow-hidden min-w-[200px] sm:block hidden">
                 {session.title}
               </div>
               <div class="flex-grow" />
@@ -87,7 +87,7 @@
                 {session.numberOfStudents} ppl.
               </div>
             </div>
-            <div class="pl-3 pb-3 text-lg overflow-scroll min-w-[200px] block sm:hidden">
+            <div class="pl-3 pb-3 text-lg overflow-hidden min-w-[200px] block sm:hidden">
               {session.title}
             </div>
           </div>
