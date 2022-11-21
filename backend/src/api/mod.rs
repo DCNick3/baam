@@ -64,6 +64,7 @@ async fn login(
 
     cookie.set_http_only(true);
     cookie.set_same_site(actix_web::cookie::SameSite::Strict);
+    cookie.set_path("/");
 
     Ok(HttpResponse::build(StatusCode::OK)
         .cookie(cookie)

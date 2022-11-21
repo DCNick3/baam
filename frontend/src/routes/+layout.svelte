@@ -1,15 +1,16 @@
 <script>
   import '../app.css';
   export const prerender = false;
-  export const ssr = false;
+  export const ssr = true;
 
   import Navbar from '$lib/Navbar.svelte';
   import * as api from '$lib/api';
   import store from '$lib/store';
 
+  // TODO: move this to +layout.ts
   (async () => {
     try {
-      const me = await api.me();
+      const me = await api.me(fetch);
       store.me.update(() => me);
     } catch (error) {
       if (api.isApiError(error) && error.status === 401) {

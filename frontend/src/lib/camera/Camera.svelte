@@ -25,9 +25,8 @@
     }));
   }
 
-  open_next_camera();
-
   onMount(() => {
+    open_next_camera();
     window.scrollTo(0, 1);
   });
 

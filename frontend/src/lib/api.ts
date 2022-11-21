@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { type Response } from 'redaxios';
 import type {
   ApiAttendanceMark,
   ApiAttendanceMarkRef,
@@ -15,53 +15,56 @@ import type {
 } from './models';
 import store from './store';
 
-const BACKEND = 'http://localhost:8080/api';
+type Fetch = typeof window.fetch;
 
-export const api = axios.create({
-  // FIXME: provide prober ssr url
-  baseURL: browser ? '/api' : BACKEND
-});
+function api(fetch: Fetch) {
+  return axios.create({
+    baseURL: '/api',
+    withCredentials: true,
+    fetch: fetch
+  });
+}
 
 // number of offsets to store
 const OFFSET_WINDOW = 8;
 
 type RequestDataTime = { startTime: Date };
 
-api.interceptors.request.use(
-  (config: AxiosRequestConfig<unknown>) => ({
-    metadata: { startTime: new Date() } as RequestDataTime,
-    ...config
-  }),
-  (error) => Promise.reject(error)
-);
-
-api.interceptors.response.use(
-  (response) => {
-    if (!response.request) return response;
-    // FIXME: use the header instead of this 💩
-    // const serverTime = new Date(response.headers['X-Precise-Time'] as string).getTime();
-    const serverTime = new Date().getTime();
-    const rtt: number = (
-      (response.config as { metadata: RequestDataTime }).metadata as RequestDataTime
-    ).startTime.getTime();
-
-    const currentServerTime = serverTime + rtt / 2;
-    const currentTime = new Date().getTime();
-    const offset = currentServerTime - currentTime;
-
-    store.timeOffsets.update((offsets) => {
-      offsets.push(offset);
-
-      if (offsets.length > OFFSET_WINDOW) {
-        offsets.shift();
-      }
-      return offsets;
-    });
-
-    return response;
-  },
-  (error) => Promise.reject(error)
-);
+// api.interceptors.request.use(
+//   (config: AxiosRequestConfig<unknown>) => ({
+//     metadata: { startTime: new Date() } as RequestDataTime,
+//     ...config
+//   }),
+//   (error) => Promise.reject(error)
+// );
+//
+// api.interceptors.response.use(
+//   (response) => {
+//     if (!response.request) return response;
+//     // FIXME: use the header instead of this 💩
+//     // const serverTime = new Date(response.headers['X-Precise-Time'] as string).getTime();
+//     const serverTime = new Date().getTime();
+//     const rtt: number = (
+//       (response.config as { metadata: RequestDataTime }).metadata as RequestDataTime
+//     ).startTime.getTime();
+//
+//     const currentServerTime = serverTime + rtt / 2;
+//     const currentTime = new Date().getTime();
+//     const offset = currentServerTime - currentTime;
+//
+//     store.timeOffsets.update((offsets) => {
+//       offsets.push(offset);
+//
+//       if (offsets.length > OFFSET_WINDOW) {
+//         offsets.shift();
+//       }
+//       return offsets;
+//     });
+//
+//     return response;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
 interface ApiError {
   error: string;
@@ -70,7 +73,7 @@ interface ApiError {
   span_id: string;
 }
 
-export function isApiError(error: unknown): error is AxiosResponse<ApiError, unknown> {
+export function isApiError(error: unknown): error is Response<ApiError> {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -88,68 +91,75 @@ export function showError(error: unknown) {
   if (isApiError(error)) {
     alert(JSON.stringify(error.data));
   }
-  alert(String(error));
+  alert(JSON.stringify(error));
 }
 
 function apiRequest<reqType, respType>(
   doRequest: reqType extends undefined
-    ? () => Promise<AxiosResponse<respType, unknown>>
-    : (data: reqType) => Promise<AxiosResponse<respType, unknown>>
-): (req?: reqType) => Promise<respType> {
-  return async (req) => {
+    ? (fetch: Fetch) => Promise<Response<respType>>
+    : (fetch: Fetch, data: reqType) => Promise<Response<respType>>
+): (fetch: Fetch, req?: reqType) => Promise<respType> {
+  return async (fetch, req) => {
     try {
-      let response: AxiosResponse<respType, unknown> | null = null;
-      if (req == undefined) {
-        response = await (doRequest as () => Promise<AxiosResponse<respType, unknown>>)();
+      let response: Response<respType> | null = null;
+      if (req === undefined) {
+        response = await (doRequest as (fetch: Fetch) => Promise<Response<respType>>)(fetch);
       } else {
-        response = await doRequest(req);
+        response = await doRequest(fetch, req);
       }
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          throw error.response as AxiosResponse<ApiError, unknown>;
-        }
-      }
+      console.log('API ERROR', JSON.stringify(error));
+      showError(error);
+      // if (axios.isAxiosError(error)) {
+      //   if (error.response) {
+      //     showError(error.response);
+      //     // throw error.response as AxiosResponse<ApiError, unknown>;
+      //   }
+      // }
 
       throw error;
     }
   };
 }
 
-export const ping = apiRequest<undefined, ApiPong>(() => api.get('/ping'));
-export const error = apiRequest<undefined, never>(() => api.get('/error'));
-export const login = apiRequest<ApiUser, ApiEmptyJson>((data) => api.post('/login', data));
-export const me = apiRequest<undefined, ApiUser>(() => api.get('/me'));
+export const ping = apiRequest<undefined, ApiPong>((f) => api(f).get('/ping'));
+export const error = apiRequest<undefined, never>((f) => api(f).get('/error'));
+export const login = apiRequest<ApiUser, ApiEmptyJson>((f, data) => api(f).post('/login', data));
+export const me = apiRequest<undefined, ApiUser>((f) => api(f).get('/me'));
 
 export const sessions = {
-  list: async () => {
-    const caller = apiRequest<undefined, ApiSession[]>(() => api.get('/sessions'));
-    const resp = await caller();
+  list: async (f: Fetch) => {
+    const caller = apiRequest<undefined, ApiSession[]>((f) => api(f).get('/sessions'));
+    const resp = await caller(f);
     console.log('got resp');
     return resp.map((x) => ({ ...x, start_time: new Date(x.start_time) }));
   },
 
-  post: apiRequest<ApiNewSession, ApiEmptyJson>((data) => api.post('/sessions', data)),
-  get: async (req: ApiGetSession) => {
-    const caller = apiRequest<ApiGetSession, ApiSession>((data) => api.get(`/sessions/${data.id}`));
-    const resp = await caller(req);
+  post: apiRequest<ApiNewSession, ApiEmptyJson>((f, data) => api(f).post('/sessions', data)),
+  get: async (f: Fetch, req: ApiGetSession) => {
+    const caller = apiRequest<ApiGetSession, ApiSession>((f, data) =>
+      api(f).get(`/sessions/${data.id}`)
+    );
+    const resp = await caller(f, req);
     return { ...resp, start_time: new Date(resp.start_time) } as Session;
   },
-  delete: apiRequest<ApiDeleteSession, ApiSession>((data) => api.delete(`/sessions/${data.id}`)),
+  delete: apiRequest<ApiDeleteSession, ApiSession>((f, data) =>
+    api(f).delete(`/sessions/${data.id}`)
+  ),
 
-  add_mark: async (req: ApiAttendanceMarkRef) => {
-    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((data) =>
-      api.get(`/sessions/${data.session_id}/marks/${data.username}`)
+  add_mark: async (f: Fetch, req: ApiAttendanceMarkRef) => {
+    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((f, data) =>
+      api(f).get(`/sessions/${data.session_id}/marks/${data.username}`)
     );
-    const resp = await caller(req);
+    const resp = await caller(f, req);
     return { ...resp, mark_time: new Date(resp.mark_time) } as AttendanceMark;
   },
-  delete_mark: async (req: ApiAttendanceMarkRef) => {
-    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((data) =>
-      api.delete(`/sessions/${data.session_id}/marks/${data.username}`)
+  delete_mark: async (f: Fetch, req: ApiAttendanceMarkRef) => {
+    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((f, data) =>
+      api(f).delete(`/sessions/${data.session_id}/marks/${data.username}`)
     );
-    const resp = await caller(req);
+    const resp = await caller(f, req);
     return { ...resp, mark_time: new Date(resp.mark_time) } as AttendanceMark;
   }
 };

@@ -40,3 +40,5 @@ const store: Store = {
 };
 
 export default store;
+export const me = store.me;
+export const timeOffsets = store.timeOffsets;
