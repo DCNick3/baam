@@ -4,6 +4,9 @@ import { Session } from '$lib/session';
 const sessions: Session[] = [];
 async function getSessionList(fetch: typeof window.fetch) {
   const list = await api.sessions.list(fetch);
+  while (sessions.length > 0) {
+    sessions.pop();
+  }
   return list
     .map(
       (session) =>
@@ -11,7 +14,7 @@ async function getSessionList(fetch: typeof window.fetch) {
           session.id,
           formatSessionTime(session.start_time),
           session.title || '[Untitled Session]',
-          -1
+          14
         )
     )
     .map((session) => sessions.push(session));
