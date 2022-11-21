@@ -14,6 +14,11 @@ const config: UserConfig = {
         baam: FileSystemIconLoader('src/lib/assets/icons')
       }
     })
-  ]
+  ],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080'
+    }
+  }
 };
 export default config;

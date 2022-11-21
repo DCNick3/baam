@@ -10,10 +10,14 @@ const config = {
   }),
 
   kit: {
+    alias: {
+      $lib: 'lib'
+    },
     adapter: adapter({
       fallback: 'index.html'
     }),
-    prerender: { entries: [] }
+    prerender: { entries: [] },
+    appDir: 'internal'
   }
 };
 
