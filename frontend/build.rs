@@ -48,10 +48,8 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> 
     Ok(())
 }
 
-fn run_yarn(command: &str) -> Result<()> {
-    let status = Command::new("yarn")
-        .current_dir(PACKAGE_JSON_DIR)
-        .arg(command)
+fn run_yarn(args: impl FnOnce(&mut Command) -> &mut Command) -> Result<()> {
+    let status = args(Command::new("yarn").current_dir(PACKAGE_JSON_DIR))
         .status()
         .context("Failed to run yarn")?;
     if !status.success() {
@@ -64,8 +62,8 @@ fn main() -> Result<()> {
     let out_dir = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     let target_dir = out_dir.join(TARGET_DIR);
 
-    run_yarn("install")?;
-    run_yarn("build")?;
+    run_yarn(|cmd| cmd.arg("install").arg("--frozen-lockfile"))?;
+    run_yarn(|cmd| cmd.arg("build"))?;
 
     copy_dir_all(TARGET_DIR, &target_dir)?;
 
