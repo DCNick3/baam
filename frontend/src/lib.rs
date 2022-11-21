@@ -3,8 +3,12 @@ use actix_web::web::ServiceConfig;
 use actix_web::{web, HttpRequest, HttpResponse, HttpResponseBuilder, Result};
 use actix_web_static_files::ResourceFiles;
 use awc::http::uri::Uri;
+use awc::Connector;
+use rustls::client::{ServerCertVerified, ServerCertVerifier};
+use rustls::ServerName;
 use serde::Deserialize;
 use std::str::FromStr;
+use std::sync::Arc;
 use tracing::info;
 use url::Url;
 
@@ -40,12 +44,37 @@ async fn index(data: web::Data<StaticData>, req: HttpRequest) -> Result<HttpResp
     Ok(resp.body(client_resp.body().await.map_err(ErrorBadGateway)?))
 }
 
+struct DummyVerifier;
+impl ServerCertVerifier for DummyVerifier {
+    fn verify_server_cert(
+        &self,
+        _end_entity: &rustls::Certificate,
+        _intermediates: &[rustls::Certificate],
+        _server_name: &ServerName,
+        _scts: &mut dyn Iterator<Item = &[u8]>,
+        _ocsp_response: &[u8],
+        _now: std::time::SystemTime,
+    ) -> std::result::Result<ServerCertVerified, rustls::Error> {
+        Ok(ServerCertVerified::assertion())
+    }
+}
+
 pub fn configure(config: Config) -> anyhow::Result<impl Fn(&mut ServiceConfig) + Clone> {
     Ok(move |cfg: &mut ServiceConfig| {
         if let Some(upstream) = &config.upstream {
             // if we have an upstream frontend server configured - proxy connections to it
             info!("Will serve frontend from {}", upstream);
-            let client = awc::Client::new();
+            let client = awc::Client::builder()
+                .connector(
+                    // disable https verification; this is only used for devserver anyways
+                    Connector::new().rustls(Arc::new(
+                        rustls::ClientConfig::builder()
+                            .with_safe_defaults()
+                            .with_custom_certificate_verifier(Arc::new(DummyVerifier))
+                            .with_no_client_auth(),
+                    )),
+                )
+                .finish();
             cfg.app_data(web::Data::new(StaticData {
                 client,
                 upstream_url: upstream.clone(),

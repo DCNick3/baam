@@ -4,6 +4,8 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import Icons from 'unplugin-icons/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
 
+const BACKEND_URL = process.env['BACKEND_URL'] ?? 'http://localhost:8080';
+
 const config: UserConfig = {
   plugins: [
     sveltekit(),
@@ -17,7 +19,7 @@ const config: UserConfig = {
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080'
+      '/api': BACKEND_URL
     }
   }
 };

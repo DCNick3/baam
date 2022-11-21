@@ -16,6 +16,7 @@
   import 'swiper/css/navigation';
   import 'swiper/css/pagination';
   import 'swiper/css/scrollbar';
+  import Export from '$lib/Export.svelte';
 
   const students: Array<Student> = [];
   students[0] = new Student('', 'n.strygin@innopolis.university');
@@ -56,6 +57,8 @@
   console.log('Running SessionCodeTimer');
   sess_time.run();
   onDestroy(() => sess_time.stop());
+
+  let sess_name = 'Untitled Attendance Session 1';
 </script>
 
 <div class="swiper-container lg:hidden">
@@ -67,11 +70,6 @@
     cssMode={true}
     on:slideChange={() => console.log('slide change')}
   >
-    <SwiperSlide>
-      <div class="flex flex-grow px-3 sm:px-20 pt-2 pb-10 w-full h-full max-h-full overflow-hidden">
-        <SessionFeed {students} />
-      </div>
-    </SwiperSlide>
     <SwiperSlide>
       <div class="flex flex-col h-full">
         {#if qr_enabled}
@@ -88,7 +86,15 @@
           <div class="w-full px-5 pt-4 mb-3">
             <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
           </div>
+          <div class="px-5">
+            <Export {sess_name} />
+          </div>
         {/if}
+      </div>
+    </SwiperSlide>
+    <SwiperSlide>
+      <div class="flex flex-grow px-3 sm:px-20 pt-2 pb-10 w-full h-full max-h-full overflow-hidden">
+        <SessionFeed bind:sess_name {students} />
       </div>
     </SwiperSlide>
   </Swiper>
@@ -98,7 +104,7 @@
   class="hidden lg:grid grid-cols-[minmax(min-content,_43em)_minmax(30em,_1fr)] h-full max-h-full "
 >
   <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3 h-full max-h-full overflow-hidden">
-    <SessionFeed {students} />
+    <SessionFeed bind:sess_name {students} />
   </div>
   <div class="flex flex-col h-100% overflow-hidden">
     {#if qr_enabled}
@@ -112,6 +118,9 @@
     {:else}
       <div class="w-full px-5 pt-4 mb-3">
         <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
+      </div>
+      <div class="px-5">
+        <Export {sess_name} />
       </div>
     {/if}
   </div>
