@@ -1,5 +1,7 @@
-use static_files::{resource_dir, NpmBuild};
+use anyhow::{bail, Context, Result};
+use static_files::resource_dir;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::{fs, io};
 
 const PACKAGE_JSON_DIR: &str = ".";
@@ -46,11 +48,22 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> 
     Ok(())
 }
 
-fn main() -> io::Result<()> {
+fn run_yarn(args: impl FnOnce(&mut Command) -> &mut Command) -> Result<()> {
+    let status = args(Command::new("yarn").current_dir(PACKAGE_JSON_DIR))
+        .status()
+        .context("Failed to run yarn")?;
+    if !status.success() {
+        bail!("Yarn failed with status: {}", status);
+    }
+    Ok(())
+}
+
+fn main() -> Result<()> {
     let out_dir = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
     let target_dir = out_dir.join(TARGET_DIR);
 
-    NpmBuild::new(PACKAGE_JSON_DIR).install()?.run("build")?;
+    run_yarn(|cmd| cmd.arg("install").arg("--frozen-lockfile"))?;
+    run_yarn(|cmd| cmd.arg("build"))?;
 
     copy_dir_all(TARGET_DIR, &target_dir)?;
 

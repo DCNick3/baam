@@ -1,14 +1,13 @@
 <script lang="ts">
-  import Button from '../../../lib/Button.svelte';
-  import QRcode from '../../../lib/QRcode.svelte';
-  import SessionFeed from '../../../lib/SessionFeed.svelte';
-  import SessionCodeTimer from '../../../lib/generate_session_code.js';
-  import { Student } from '../../../lib/student.js';
+  import Button from '$lib/Button.svelte';
+  import QRcode from '$lib/QRcode.svelte';
+  import SessionFeed from '$lib/SessionFeed.svelte';
+  import SessionCodeTimer from '$lib/generate_session_code';
+  import { Student } from '$lib/student';
+  import type { Session } from '$lib/models';
+
   import { onDestroy } from 'svelte';
-
-  // import Swiper core and required modules
   import { Navigation } from 'swiper';
-
   import { Swiper, SwiperSlide } from 'swiper/svelte';
 
   // Import Swiper styles

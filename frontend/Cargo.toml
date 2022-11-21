@@ -21,3 +21,4 @@ static-files = "0.2.1"
 [build-dependencies]
 static-files = "0.2.1"
 change-detection = "1.2.0"
+anyhow = "1.0.64"

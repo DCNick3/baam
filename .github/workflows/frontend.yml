@@ -42,4 +42,4 @@ jobs:
           yarn lint
           yarn run check
 
-          yarn test
+#          yarn test

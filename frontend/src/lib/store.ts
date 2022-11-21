@@ -29,16 +29,5 @@ const val = <T>(key: string, initValue: T): Writable<T> => {
   return store;
 };
 
-export interface Store {
-  timeOffsets: Writable<number[]>;
-  me: Writable<ApiUser | undefined>;
-}
-
-const store: Store = {
-  timeOffsets: writable([0]),
-  me: writable(undefined)
-};
-
-export default store;
-export const me = store.me;
-export const timeOffsets = store.timeOffsets;
+export const timeOffsets = writable([0]);
+export const user = writable(<ApiUser | null>null);

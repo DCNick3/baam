@@ -21,6 +21,7 @@
     "@types/crypto-js": "^4.1.1",
     "@types/lodash": "^4.14.189",
     "@types/qrcode": "^1.5.0",
+    "@types/set-cookie-parser": "^2.4.2",
     "@types/varint": "^6.0.1",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
@@ -35,6 +36,7 @@
     "prettier": "^2.6.2",
     "prettier-plugin-svelte": "^2.7.0",
     "qrcode": "^1.5.1",
+    "set-cookie-parser": "^2.5.1",
     "svelte": "^3.44.0",
     "svelte-check": "^2.7.1",
     "svelte-preprocess": "^4.10.7",
@@ -44,8 +46,7 @@
     "typescript": "=4.8.4",
     "unplugin-icons": "^0.14.13",
     "varint": "^6.0.0",
-    "vite": "^3.1.0-beta.1",
-    "redaxios": "^0.5.1"
+    "vite": "^3.1.0-beta.1"
   },
   "type": "module",
   "dependencies": {}

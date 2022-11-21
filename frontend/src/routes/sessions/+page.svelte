@@ -2,7 +2,8 @@
   import Button from '$lib/Button.svelte';
   import type { Session } from '$lib/session';
   import Bomb from '~icons/baam/bomb';
-  export let data: { sessions: Session[] };
+  import type { PageData } from './$types';
+  export let data: PageData;
 
   let sessions: Array<Session> = data.sessions;
   let selection: Array<number> = [];

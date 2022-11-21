@@ -1,16 +1,16 @@
 <script lang="ts">
-  import * as api from '$lib/api';
+  // import { api } from '$lib/api';
   import { onMount } from 'svelte';
 
   let text: Promise<string> | undefined;
 
   onMount(async () => {
-    text = api
-      .login(fetch, { name: 'aboba', username: 'aboba' })
-      .then(() => {
-        return api.me(fetch);
-      })
-      .then((x) => JSON.stringify(x));
+    //text = api
+    //  .login(fetch, { name: 'aboba', username: 'aboba' })
+    //  .then(() => {
+    //    return api.me(fetch);
+    //  })
+    //  .then((x) => JSON.stringify(x));
   });
 </script>
 

@@ -42,6 +42,9 @@ ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 RUN node --version
 
+# install yarn
+RUN npm install -g yarn
+
 COPY --from=get-protoc /protoc /usr/local/bin/protoc
 
 COPY --from=planner /volume/recipe.json recipe.json
