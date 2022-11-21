@@ -5,17 +5,19 @@ services:
     image: postgres
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-  # frontend:
-  #   build: frontend
-  #   volumes:
-  #     - type: bind
-  #       source: ./frontend
-  #       target: /app
-  #   command: npm run dev -- --host 0.0.0.0
-  #   ports:
-  #     # expose frontend port for websocket connection
-  #     # (backend can't ¿yet? proxy it)
-  #     - "5173:5173"
+  frontend:
+    build: frontend
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      - BACKEND_URL=http://backend:8080
+    ports:
+      # expose frontend port for websocket connection
+      # (backend can't ¿yet? proxy it)
+      - "5173:5173"
   backend:
     build: .
     environment:
@@ -26,11 +28,13 @@ services:
       - type: bind
         source: ./config.docker-dev.yml
         target: /config.dev.yml
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
+#    ports:
+#      - "8080:8080"
     depends_on:
       - db
-      # - frontend
+      - frontend
       - jaeger
   jaeger:
     image: jaegertracing/all-in-one:latest
