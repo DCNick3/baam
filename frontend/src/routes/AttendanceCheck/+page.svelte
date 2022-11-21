@@ -64,6 +64,7 @@
     spaceBetween={50}
     slidesPerView={1}
     navigation
+    cssMode={true}
     on:slideChange={() => console.log('slide change')}
   >
     <SwiperSlide>

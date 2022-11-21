@@ -7,7 +7,7 @@
 <div
   class="{$$props.class} flex ml-2 mr-2 flex-col border-[1px] border-gray-300 rounded-t-md rounded-b-md max-h-full min-h-[140px] min-w-[150px]"
 >
-  <ul class="flex-grow-0 flex-shrink overflow-y-hidden">
+  <ul class="flex-grow-0 flex-shrink overflow-y-scroll">
     {#each students as student, i}
       <li class="border-t-[1px] first:border-t-0 last:border-b-[1px] border-gray-300 min-w-[150px]">
         <div class="flex">
