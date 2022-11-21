@@ -42,6 +42,12 @@ async fn make_error() -> ApiResult<web::Bytes> {
     Err(anyhow!("Example error").into())
 }
 
+fn cookie_config(cookie: &mut Cookie) {
+    cookie.set_http_only(true);
+    cookie.set_same_site(actix_web::cookie::SameSite::Strict);
+    cookie.set_path("/");
+}
+
 #[post("/login")]
 async fn login(
     db: DbData,
@@ -62,13 +68,28 @@ async fn login(
         .create_signed_cookie(user.into())
         .map_err(|e| anyhow!("Cookie creation failed: {:?}", e))?;
 
-    cookie.set_http_only(true);
-    cookie.set_same_site(actix_web::cookie::SameSite::Strict);
-    cookie.set_path("/");
+    cookie_config(&mut cookie);
 
     Ok(HttpResponse::build(StatusCode::OK)
         .cookie(cookie)
         .json(HashMap::<(), ()>::new()))
+}
+
+#[post("/logout")]
+async fn logout(req: actix_web::HttpRequest, authority: web::Data<auth::Authority>) -> ApiResult<HttpResponse> {
+    match req.cookie(authority.cookie_name) {
+        Some(mut cookie) =>  {
+            cookie_config(&mut cookie);        
+            cookie.make_removal();
+            Ok(HttpResponse::build(StatusCode::OK)
+                .cookie(cookie)
+                .json(HashMap::<(), ()>::new()))
+        }
+        None => Ok(
+            HttpResponse::Ok()
+                .json(HashMap::<(), ()>::new())
+        )
+    }
 }
 
 #[get("/me")]
@@ -102,6 +123,7 @@ pub fn configure(config: Config, keys: AuthKeys) -> Result<impl Fn(&mut ServiceC
             .service(sessions::delete_mark)
             // auth
             .service(login)
+            .service(logout)
             .service(me)
             // challenge
             .configure(challenge::configure(config.challenge.clone()))
