@@ -4,6 +4,22 @@ import WordArray from 'crypto-js/lib-typedarrays';
 import CryptoJS from 'crypto-js';
 import varint from 'varint';
 
+function bswap(x: number): number {
+  x = x | 0;
+  const b0 = x & 0xff;
+  const b1 = (x >> 8) & 0xff;
+  const b2 = (x >> 16) & 0xff;
+  const b3 = (x >> 24) & 0xff;
+  return b3 | (b2 << 8) | (b1 << 16) | (b0 << 24);
+}
+
+function truncate(array: WordArray, length: number): WordArray {
+  const result = WordArray.create();
+  result.sigBytes = length;
+  result.words = array.words.slice(0, Math.ceil(length / 4));
+  return result;
+}
+
 export default class SessionCodeTimer {
   t0: number;
   tx: number;
@@ -46,16 +62,7 @@ export default class SessionCodeTimer {
   }
 
   encodeNumberToWordArray(x: number) {
-    return WordArray.create([this.bswap(x)]);
-  }
-
-  bswap(x: number) {
-    x = x | 0;
-    const b0 = x & 0xff;
-    const b1 = (x >> 8) & 0xff;
-    const b2 = (x >> 16) & 0xff;
-    const b3 = (x >> 24) & 0xff;
-    return b3 | (b2 << 8) | (b1 << 16) | (b0 << 24);
+    return WordArray.create([bswap(x)]);
   }
 
   efficientEncodeToWordArray(x: number) {
@@ -86,8 +93,19 @@ export default class SessionCodeTimer {
 
   getSessionCode() {
     this.counter = this.counter + 1;
-    let code = hmacSHA1(this.secret, this.encodeNumberToWordArray(this.counter));
-    code = WordArray.create(code.words.slice(this.bytes_to_slice));
+    const index_encoded = this.encodeNumberToWordArray(this.counter);
+    let code = hmacSHA1(index_encoded, this.secret);
+    // console.log(
+    //   'key = ',
+    //   this.secret.toString(CryptoJS.enc.Hex),
+    //   'counter =',
+    //   this.counter,
+    //   'index_encoded =',
+    //   index_encoded.toString(CryptoJS.enc.Hex),
+    //   'HMAC',
+    //   code.toString(CryptoJS.enc.Hex)
+    // );
+    code = truncate(code, this.bytes_to_slice);
     code = code.concat(this.efficientEncodeToWordArray(this.sess_id));
     code = code.concat(this.efficientEncodeToWordArray(this.counter));
     let encoded_code = code.toString(CryptoJS.enc.Base64);
