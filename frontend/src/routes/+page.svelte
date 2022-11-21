@@ -17,9 +17,9 @@
           <!-- reserve some space !-->
           <div class="h-5 md:h-20" />
           <MenuHeader text="Collect Attendance" />
-          <MenuItem text="New session" icon="new-session" href="/AttendanceCheck" />
-          <MenuItem text="Last Session" icon="new-session" href="/AttendanceCheck" />
-          <MenuItem text="All Sessions" icon="session-list" href="/AttendanceSessions" />
+          <MenuItem text="New session" icon="new-session" href="/sessions/new" />
+          <MenuItem text="Last Session" icon="new-session" href="/sessions/last" />
+          <MenuItem text="All Sessions" icon="session-list" href="/sessions" />
         </div>
         <div class="lg:w-20" />
         <div

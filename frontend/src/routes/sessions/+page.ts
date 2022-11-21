@@ -2,8 +2,8 @@ import * as api from '$lib/api';
 import { Session } from '$lib/session';
 
 const sessions: Session[] = [];
-async function getSessionList() {
-  const list = await api.sessions.list();
+async function getSessionList(fetch: typeof window.fetch) {
+  const list = await api.sessions.list(fetch);
   return list
     .map(
       (session) =>
@@ -47,12 +47,12 @@ function formatSessionTime(sessionTime: Date) {
   }
 }
 
-export async function load() {
-  await getSessionList();
+export async function load({ fetch }: { fetch: typeof window.fetch }) {
+  await getSessionList(fetch);
   return {
     sessions
   };
 }
 
-export const ssr = false;
+export const ssr = true;
 export const csr = true;
