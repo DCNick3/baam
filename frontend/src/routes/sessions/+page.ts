@@ -1,24 +1,5 @@
-import * as api from '$lib/api';
 import { Session } from '$lib/session';
-
-const sessions: Session[] = [];
-async function getSessionList(fetch: typeof window.fetch) {
-  const list = await api.sessions.list(fetch);
-  while (sessions.length > 0) {
-    sessions.pop();
-  }
-  return list
-    .map(
-      (session) =>
-        new Session(
-          session.id,
-          formatSessionTime(session.start_time),
-          session.title || '[Untitled Session]',
-          14
-        )
-    )
-    .map((session) => sessions.push(session));
-}
+import { load_with_api } from '$lib/api';
 
 const month = [
   '0 month',
@@ -50,12 +31,17 @@ function formatSessionTime(sessionTime: Date) {
   }
 }
 
-export async function load({ fetch }: { fetch: typeof window.fetch }) {
-  await getSessionList(fetch);
+export const load = load_with_api(async ({ api }) => {
+  const list = await api.sessions.list();
   return {
-    sessions
+    sessions: list.map(
+      (session) =>
+        new Session(
+          session.id,
+          formatSessionTime(session.start_time),
+          session.title || '[Untitled Session]',
+          -1
+        )
+    )
   };
-}
-
-export const ssr = true;
-export const csr = true;
+});

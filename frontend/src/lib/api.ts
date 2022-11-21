@@ -1,165 +1,195 @@
 import { browser } from '$app/environment';
-import axios, { type Response } from 'redaxios';
 import type {
   ApiAttendanceMark,
   ApiAttendanceMarkRef,
   ApiDeleteSession,
-  ApiEmptyJson,
+  ApiEmpty,
   ApiGetSession,
+  ApiLogin,
   ApiNewSession,
-  ApiPong,
   ApiSession,
+  ApiSessionWithMarks,
   ApiUser,
   AttendanceMark,
-  Session
+  Session,
+  SessionWithMarks
 } from './models';
-import store from './store';
+// import store from './store';
 
 type Fetch = typeof window.fetch;
 
-function api(fetch: Fetch) {
-  return axios.create({
-    baseURL: '/api',
-    withCredentials: true,
-    fetch: fetch
-  });
+export class ApiError extends Error {
+  code: number;
+  data: RawApiError;
+  constructor(code: number, data: RawApiError) {
+    super(`API error ${code}: ${data.error}`);
+    this.name = 'ApiError';
+    this.code = code;
+    this.data = data;
+  }
 }
 
-// number of offsets to store
-const OFFSET_WINDOW = 8;
-
-type RequestDataTime = { startTime: Date };
-
-// api.interceptors.request.use(
-//   (config: AxiosRequestConfig<unknown>) => ({
-//     metadata: { startTime: new Date() } as RequestDataTime,
-//     ...config
-//   }),
-//   (error) => Promise.reject(error)
-// );
-//
-// api.interceptors.response.use(
-//   (response) => {
-//     if (!response.request) return response;
-//     // FIXME: use the header instead of this 💩
-//     // const serverTime = new Date(response.headers['X-Precise-Time'] as string).getTime();
-//     const serverTime = new Date().getTime();
-//     const rtt: number = (
-//       (response.config as { metadata: RequestDataTime }).metadata as RequestDataTime
-//     ).startTime.getTime();
-//
-//     const currentServerTime = serverTime + rtt / 2;
-//     const currentTime = new Date().getTime();
-//     const offset = currentServerTime - currentTime;
-//
-//     store.timeOffsets.update((offsets) => {
-//       offsets.push(offset);
-//
-//       if (offsets.length > OFFSET_WINDOW) {
-//         offsets.shift();
-//       }
-//       return offsets;
-//     });
-//
-//     return response;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
-interface ApiError {
+export interface RawApiError {
   error: string;
   request_id: string;
   trace_id: string;
   span_id: string;
 }
 
-export function isApiError(error: unknown): error is Response<ApiError> {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'data' in error &&
-    typeof (error as { data: unknown }).data === 'object' &&
-    (error as { data: unknown }).data !== null &&
-    ['error', 'request_id', 'trace_id', 'span_id'].every(
-      (x) => x in (error as { data: Record<string, unknown> }).data
-    )
-  );
+class Fetcher {
+  fetch: Fetch;
+  baseURL: string;
+
+  constructor(fetch_?: Fetch, baseURL?: string) {
+    this.fetch = fetch_ ?? fetch;
+    this.baseURL = baseURL ?? '/';
+  }
+
+  request<D, T>(method: string, url: string, data: D): Promise<T>;
+  request<D, T, R>(method: string, url: string, data: D, map: (data: T) => R): Promise<R>;
+  request<D, T, R>(method: string, url: string, data: D, map?: (data: T) => R): Promise<T | R>;
+
+  async request<D, T, R>(
+    method: string,
+    url: string,
+    data: D,
+    map?: (data: T) => R
+  ): Promise<T | R> {
+    const customHeaders: { [name: string]: string } = {};
+
+    let encoded_data;
+    if (data) {
+      encoded_data = JSON.stringify(data);
+      customHeaders['content-type'] = 'application/json';
+    }
+
+    url = url.replace(/^(?!.*\/\/)\/?/, this.baseURL + '/');
+
+    const response = await this.fetch(url, {
+      method: (method || 'get').toUpperCase(),
+      body: encoded_data,
+      headers: customHeaders,
+      credentials: 'include'
+    });
+    const text = await response.text();
+
+    const result_data = JSON.parse(text);
+
+    if (response.status >= 200 && response.status < 300) {
+      if (map) {
+        return map(result_data);
+      } else {
+        return result_data;
+      }
+    } else {
+      throw new ApiError(response.status, result_data);
+    }
+  }
+
+  get<T>(url: string): Promise<T>;
+  get<T, R>(url: string, map: (data: T) => R): Promise<R>;
+  get<T, R>(url: string, map?: (data: T) => R): Promise<T | R> {
+    return this.request('get', url, null, map);
+  }
+
+  post<D, T>(url: string, data: D): Promise<T>;
+  post<D, T, R>(url: string, data: D, map: (data: T) => R): Promise<R>;
+  post<D, T, R>(url: string, data: D, map?: (data: T) => R): Promise<T | R> {
+    return this.request('post', url, data, map);
+  }
+
+  put<D, T>(url: string, data: D): Promise<T>;
+  put<D, T, R>(url: string, data: D, map: (data: T) => R): Promise<R>;
+  put<D, T, R>(url: string, data: D, map?: (data: T) => R): Promise<T | R> {
+    return this.request('put', url, data, map);
+  }
+
+  delete<T>(url: string): Promise<T>;
+  delete<T, R>(url: string, map: (data: T) => R): Promise<R>;
+  delete<T, R>(url: string, map?: (data: T) => R): Promise<T | R> {
+    return this.request('delete', url, map);
+  }
+
+  patch<D, T>(url: string, data: D): Promise<T>;
+  patch<D, T, R>(url: string, data: D, map: (data: T) => R): Promise<R>;
+  patch<D, T, R>(url: string, data: D, map?: (data: T) => R): Promise<T | R> {
+    return this.request('patch', url, data, map);
+  }
 }
 
 export function showError(error: unknown) {
+  // TODO: report to the tracing service
   if (!browser) return;
-  if (isApiError(error)) {
-    alert(JSON.stringify(error.data));
+  if (error instanceof ApiError) {
+    // the backend returned an error
+    alert(error.message);
+  } else if (error instanceof TypeError) {
+    // probably a network error
+    alert('Network error: ' + error.message);
+  } else {
+    alert('Unknown error while using an API: ' + JSON.stringify(error));
   }
-  alert(JSON.stringify(error));
 }
 
-function apiRequest<reqType, respType>(
-  doRequest: reqType extends undefined
-    ? (fetch: Fetch) => Promise<Response<respType>>
-    : (fetch: Fetch, data: reqType) => Promise<Response<respType>>
-): (fetch: Fetch, req?: reqType) => Promise<respType> {
-  return async (fetch, req) => {
-    try {
-      let response: Response<respType> | null = null;
-      if (req === undefined) {
-        response = await (doRequest as (fetch: Fetch) => Promise<Response<respType>>)(fetch);
-      } else {
-        response = await doRequest(fetch, req);
-      }
-      return response.data;
-    } catch (error) {
-      console.log('API ERROR', JSON.stringify(error));
-      showError(error);
-      // if (axios.isAxiosError(error)) {
-      //   if (error.response) {
-      //     showError(error.response);
-      //     // throw error.response as AxiosResponse<ApiError, unknown>;
-      //   }
-      // }
+function map_session(s: ApiSession): Session {
+  return {
+    ...s,
+    start_time: new Date(s.start_time)
+  };
+}
 
-      throw error;
+function map_session_with_marks(s: ApiSessionWithMarks): SessionWithMarks {
+  return {
+    ...s,
+    start_time: new Date(s.start_time),
+    marks: s.marks.map(map_attendance_mark)
+  };
+}
+
+function map_attendance_mark(m: ApiAttendanceMark): AttendanceMark {
+  return {
+    ...m,
+    mark_time: new Date(m.mark_time)
+  };
+}
+
+export function make_api(fetch: Fetch) {
+  const api = new Fetcher(fetch, '/api');
+  return {
+    me: () => api.get<ApiUser>('/me'),
+    login: (data: ApiLogin) => api.post<ApiLogin, ApiEmpty>('/login', data),
+    sessions: {
+      list: () => api.get<ApiSession[], Session[]>('/sessions', (data) => data.map(map_session)),
+      get: ({ id }: ApiGetSession) =>
+        api.get<ApiSessionWithMarks, SessionWithMarks>(`/sessions/${id}`, map_session_with_marks),
+      new: (data: ApiNewSession) =>
+        api.post<ApiNewSession, ApiSession, Session>('/sessions', data, map_session),
+      delete: (data: ApiDeleteSession) =>
+        api.delete<ApiSession, Session>(`/sessions/${data.id}`, map_session),
+
+      add_mark: (data: ApiAttendanceMarkRef) =>
+        api.put<undefined, ApiAttendanceMark, AttendanceMark>(
+          `/sessions/${data.session_id}/marks/${data.username}`,
+          undefined,
+          map_attendance_mark
+        ),
+      delete_mark: (data: ApiAttendanceMarkRef) =>
+        api.delete<ApiAttendanceMark, AttendanceMark>(
+          `/sessions/${data.session_id}/marks/${data.username}`,
+          map_attendance_mark
+        )
     }
   };
 }
 
-export const ping = apiRequest<undefined, ApiPong>((f) => api(f).get('/ping'));
-export const error = apiRequest<undefined, never>((f) => api(f).get('/error'));
-export const login = apiRequest<ApiUser, ApiEmptyJson>((f, data) => api(f).post('/login', data));
-export const me = apiRequest<undefined, ApiUser>((f) => api(f).get('/me'));
+export const api = make_api(fetch);
 
-export const sessions = {
-  list: async (f: Fetch) => {
-    const caller = apiRequest<undefined, ApiSession[]>((f) => api(f).get('/sessions'));
-    const resp = await caller(f);
-    console.log('got resp');
-    return resp.map((x) => ({ ...x, start_time: new Date(x.start_time) }));
-  },
+type Api = ReturnType<typeof make_api>;
 
-  post: apiRequest<ApiNewSession, ApiEmptyJson>((f, data) => api(f).post('/sessions', data)),
-  get: async (f: Fetch, req: ApiGetSession) => {
-    const caller = apiRequest<ApiGetSession, ApiSession>((f, data) =>
-      api(f).get(`/sessions/${data.id}`)
-    );
-    const resp = await caller(f, req);
-    return { ...resp, start_time: new Date(resp.start_time) } as Session;
-  },
-  delete: apiRequest<ApiDeleteSession, ApiSession>((f, data) =>
-    api(f).delete(`/sessions/${data.id}`)
-  ),
-
-  add_mark: async (f: Fetch, req: ApiAttendanceMarkRef) => {
-    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((f, data) =>
-      api(f).get(`/sessions/${data.session_id}/marks/${data.username}`)
-    );
-    const resp = await caller(f, req);
-    return { ...resp, mark_time: new Date(resp.mark_time) } as AttendanceMark;
-  },
-  delete_mark: async (f: Fetch, req: ApiAttendanceMarkRef) => {
-    const caller = apiRequest<ApiAttendanceMarkRef, ApiAttendanceMark>((f, data) =>
-      api(f).delete(`/sessions/${data.session_id}/marks/${data.username}`)
-    );
-    const resp = await caller(f, req);
-    return { ...resp, mark_time: new Date(resp.mark_time) } as AttendanceMark;
-  }
-};
+export function load_with_api<T, R>(
+  args: (param: T & { api: Api }) => Promise<R>
+): (param: T & { fetch: Fetch }) => Promise<R> {
+  return async (param) => {
+    return args({ ...param, api: make_api(param.fetch) });
+  };
+}

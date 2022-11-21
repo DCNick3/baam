@@ -84,7 +84,7 @@ pub fn configure(config: Config) -> anyhow::Result<impl Fn(&mut ServiceConfig) +
             // serve the built-in files otherwise
             info!("Will serve frontend from the built-in files");
             let generated = generate();
-            cfg.service(ResourceFiles::new("/", generated));
+            cfg.service(ResourceFiles::new("/", generated).resolve_not_found_to_root());
         }
     })
 }
