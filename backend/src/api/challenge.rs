@@ -11,7 +11,7 @@ use anyhow::Result;
 use chrono::TimeZone;
 use chrono::{DateTime, Utc};
 use hmac::Mac;
-use integer_encoding::{VarInt, VarIntReader};
+use integer_encoding::VarIntReader;
 use serde::Deserialize;
 use sha1::Sha1;
 use std::io::Read;
@@ -63,7 +63,7 @@ fn parse_encoded_challenge(data: &str) -> Result<ParsedChallenge> {
     if data.len() > 64 {
         bail!("Challenge too long");
     }
-    let data = base64::decode(data)?;
+    let data = base64::decode(data.replace('-', "+").replace('_', "/"))?;
     parse_challenge(&data)
 }
 
@@ -91,10 +91,18 @@ fn validate_challenge(
         + chrono::Duration::from_std(config.qr_interval * challenge.challenge_index)?;
     let expected_end_time = expected_start_time + chrono::Duration::from_std(config.qr_interval)?;
 
+    fn difference(a: DateTime<Utc>, b: DateTime<Utc>) -> chrono::Duration {
+        if a > b {
+            a - b
+        } else {
+            b - a
+        }
+    }
+
     // TODO: this is probably not correct
-    let difference_1 = (submission_time - expected_start_time).max(chrono::Duration::zero());
-    let difference_2 = (expected_end_time - submission_time).max(chrono::Duration::zero());
-    let difference = difference_1.max(difference_2);
+    let difference_1 = difference(submission_time, expected_start_time);
+    let difference_2 = difference(submission_time, expected_end_time);
+    let difference = difference_1.min(difference_2);
 
     if difference > chrono::Duration::from_std(config.jitter_window)? {
         bail!(
@@ -186,6 +194,7 @@ pub fn configure(config: Config) -> impl Fn(&mut ServiceConfig) + Clone {
 #[cfg(test)]
 mod test {
     use crate::api::challenge::{parse_challenge, validate_challenge};
+    use std::ops::Add;
     use std::time::Duration;
 
     #[test]
@@ -212,7 +221,7 @@ mod test {
         let parsed_challenge = parse_challenge(&base64::decode("MIl1tAwE").unwrap()).unwrap();
         validate_challenge(
             parsed_challenge,
-            chrono::Utc::now(),
+            chrono::Utc::now().add(chrono::Duration::seconds(4)),
             super::ChallengeParams {
                 start_time: chrono::Utc::now(),
                 seed,
