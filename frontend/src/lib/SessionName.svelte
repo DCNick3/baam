@@ -1,5 +1,5 @@
 <script lang="ts">
-  let name = 'Untitled Attendance Session';
+  export let name = 'Untitled Attendance Session';
   let style_classes = '';
   let interrupt = false;
 
@@ -35,6 +35,13 @@
     handleBorderStyle(false);
     sendContentToServer(e);
   };
+  let first_selection = true;
+  const handleFocus = function (e: Event) {
+    if (first_selection) {
+      (e.target as HTMLInputElement).select();
+      first_selection = false;
+    }
+  };
 </script>
 
 <div
@@ -44,6 +51,7 @@
   <input
     class="pl-2 sm:border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow min-w-[150px] overflow-auto"
     type="text"
+    on:focus={handleFocus}
     on:input={handleInput}
     bind:value={name}
   />
