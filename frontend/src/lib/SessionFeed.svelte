@@ -13,5 +13,5 @@
     <OutlineButton class="m-2 mb-4" type="Danger">Scrap</OutlineButton>
     <Sessionname bind:name={sess_name} class="flex-grow mr-2" />
   </div>
-  <StudentsList class="flex-grow" {students} />
+  <StudentsList class="flex-grow" bind:students />
 </div>

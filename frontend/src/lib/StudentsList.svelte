@@ -1,13 +1,33 @@
 <script lang="ts">
-  import type { Student } from '$lib/student.js';
+  import { Student } from '$lib/student';
   import Button from './Button.svelte';
+  import { afterUpdate } from 'svelte';
   export let students: Array<Student> = [];
+  let list: HTMLElement;
+
+  let student_email = '';
+
+  function add_student() {
+    console.log('add_student', student_email);
+    students = [...students, new Student('', student_email)];
+    student_email = '';
+  }
+
+  afterUpdate(() => {
+    list.scrollTop = list.scrollHeight;
+  });
+
+  function on_key_down(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      add_student();
+    }
+  }
 </script>
 
 <div
   class="{$$props.class} flex ml-2 mr-2 flex-col border-[1px] border-gray-300 rounded-t-md rounded-b-md max-h-full min-h-[140px] min-w-[150px]"
 >
-  <ul class="flex-grow-0 flex-shrink overflow-y-scroll">
+  <ul class="flex-grow-0 flex-shrink overflow-y-scroll" bind:this={list}>
     {#each students as student, i}
       <li class="border-t-[1px] first:border-t-0 last:border-b-[1px] border-gray-300 min-w-[150px]">
         <div class="flex">
@@ -27,8 +47,14 @@
     <input
       class="pl-2 focus:outline-none text-gray-800 flex-grow min-w-[150px] overflow-auto"
       type="text"
+      bind:value={student_email}
+      on:keydown={on_key_down}
     />
-    <Button class="rounded-t-none rounded-l-none border-r-[1px]" type="Success">Add</Button>
+    <Button
+      class="rounded-t-none rounded-l-none border-r-[1px]"
+      type="Success"
+      on:click={add_student}>Add</Button
+    >
   </div>
 </div>
 

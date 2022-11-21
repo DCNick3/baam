@@ -18,7 +18,7 @@
   import 'swiper/css/scrollbar';
   import Export from '$lib/Export.svelte';
 
-  const students: Array<Student> = [];
+  let students: Array<Student> = [];
   students[0] = new Student('', 'n.strygin@innopolis.university');
   students[1] = new Student('', 'vy.sergeev@innopolis.university');
   students[2] = new Student('', 'n.strygin@innopolis.university');
@@ -69,7 +69,13 @@
     navigation
     cssMode={true}
     on:slideChange={() => console.log('slide change')}
+    initialSlide={2}
   >
+    <SwiperSlide>
+      <div class="flex flex-grow px-3 sm:px-20 pt-2 pb-10 w-full h-full max-h-full overflow-hidden">
+        <SessionFeed bind:sess_name bind:students />
+      </div>
+    </SwiperSlide>
     <SwiperSlide>
       <div class="flex flex-col h-full">
         {#if qr_enabled}
@@ -92,11 +98,6 @@
         {/if}
       </div>
     </SwiperSlide>
-    <SwiperSlide>
-      <div class="flex flex-grow px-3 sm:px-20 pt-2 pb-10 w-full h-full max-h-full overflow-hidden">
-        <SessionFeed bind:sess_name {students} />
-      </div>
-    </SwiperSlide>
   </Swiper>
 </div>
 
@@ -104,7 +105,7 @@
   class="hidden lg:grid grid-cols-[minmax(min-content,_43em)_minmax(30em,_1fr)] h-full max-h-full "
 >
   <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3 h-full max-h-full overflow-hidden">
-    <SessionFeed bind:sess_name {students} />
+    <SessionFeed bind:sess_name bind:students />
   </div>
   <div class="flex flex-col h-100% overflow-hidden">
     {#if qr_enabled}
