@@ -7,7 +7,7 @@
   } from './MediaStreamManager';
   import Button from '../Button.svelte';
   import CameraVideo from './CameraVideo.svelte';
-  import { VideoState } from './VideoState';
+  import type { VideoState } from './VideoState';
 
   const camera = new MediaStreamManager();
 

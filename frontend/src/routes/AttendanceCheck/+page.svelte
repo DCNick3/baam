@@ -58,7 +58,7 @@
   onDestroy(() => sess_time.stop());
 </script>
 
-<div class="lg:hidden">
+<div class="swiper-container lg:hidden">
   <Swiper
     modules={[Navigation]}
     spaceBetween={50}
@@ -72,21 +72,23 @@
       </div>
     </SwiperSlide>
     <SwiperSlide>
-      {#if qr_enabled}
-        <div class="w-full px-5 pt-4 mb-3">
-          <Button class="w-[100%]" type="Primary" on:click={flipState}
-            >Finish showing QR code</Button
-          >
-        </div>
-        <!-- !!!DO NOT ADD ANY MORE WRAPPERS. It breaks vertical QR code resizing! -->
-        <div class="w-full contents mb-10">
-          <QRcode qr_data={qr_code_data} />
-        </div>
-      {:else}
-        <div class="w-full px-5 pt-4 mb-3">
-          <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
-        </div>
-      {/if}
+      <div class="flex flex-col h-full">
+        {#if qr_enabled}
+          <div class="w-full px-5 pt-4 mb-3">
+            <Button class="w-[100%]" type="Primary" on:click={flipState}
+              >Finish showing QR code</Button
+            >
+          </div>
+          <!-- !!!DO NOT ADD ANY MORE WRAPPERS. It breaks vertical QR code resizing! -->
+          <div class="w-full contents mb-10">
+            <QRcode qr_data={qr_code_data} />
+          </div>
+        {:else}
+          <div class="w-full px-5 pt-4 mb-3">
+            <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
+          </div>
+        {/if}
+      </div>
     </SwiperSlide>
   </Swiper>
 </div>
@@ -113,3 +115,9 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .swiper-container > :global(.swiper) {
+    height: 100%;
+  }
+</style>
