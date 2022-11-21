@@ -231,7 +231,7 @@
 
 "@types/set-cookie-parser@^2.4.2":
   version "2.4.2"
-  resolved "https://registry.yarnpkg.com/@types/set-cookie-parser/-/set-cookie-parser-2.4.2.tgz#b6a955219b54151bfebd4521170723df5e13caad"
+  resolved "https://registry.npmjs.org/@types/set-cookie-parser/-/set-cookie-parser-2.4.2.tgz"
   integrity sha512-fBZgytwhYAUkj/jC/FAV4RQ5EerRup1YQsXQCh8rZfiHkc4UahC192oH0smGwsXol3cL3A5oETuAHeQHmhXM4w==
   dependencies:
     "@types/node" "*"
