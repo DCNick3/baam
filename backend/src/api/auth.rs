@@ -61,6 +61,7 @@ impl Authority {
         }
     }
 
+    /// Produce cookie for user authentication
     pub fn create_signed_cookie(&self, claims: UserClaims) -> Result<Cookie> {
         let claims = jwt_compact::Claims::new(claims)
             .set_duration_and_issuance(&self.time_options, self.duration);
