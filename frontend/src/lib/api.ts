@@ -142,7 +142,7 @@ function map_session_with_marks(s: ApiSessionWithMarks): SessionWithMarks {
   return {
     ...s,
     start_time: new Date(s.start_time),
-    marks: s.marks.map(map_attendance_mark)
+    attendance_marks: Array.from(s.attendance_marks).map(map_attendance_mark)
   };
 }
 
@@ -159,10 +159,11 @@ export function make_api(fetch: Fetch) {
     me: () => api.get<ApiUser>('/me'),
     login: (data: ApiLogin) => api.post<ApiLogin, ApiEmpty>('/login', data),
     sessions: {
-      list: () => api.get<ApiSession[], Session[]>('/sessions', (data) => data.map(map_session)),
+      list: () =>
+        api.get<ApiSession[], Session[]>('/sessions', (data) => Array.from(data).map(map_session)),
       get: ({ id }: ApiGetSession) =>
         api.get<ApiSessionWithMarks, SessionWithMarks>(`/sessions/${id}`, map_session_with_marks),
-      new: (data: ApiNewSession) =>
+      create: (data: ApiNewSession) =>
         api.post<ApiNewSession, ApiSession, Session>('/sessions', data, map_session),
       delete: (data: ApiDeleteSession) =>
         api.delete<ApiSession, Session>(`/sessions/${data.id}`, map_session),
