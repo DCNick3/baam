@@ -48,5 +48,6 @@
     "redaxios": "^0.5.1"
   },
   "type": "module",
-  "dependencies": {}
+  "dependencies": {
+  }
 }
