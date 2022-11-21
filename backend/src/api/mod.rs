@@ -76,19 +76,19 @@ async fn login(
 }
 
 #[post("/logout")]
-async fn logout(req: actix_web::HttpRequest, authority: web::Data<auth::Authority>) -> ApiResult<HttpResponse> {
+async fn logout(
+    req: actix_web::HttpRequest,
+    authority: web::Data<auth::Authority>,
+) -> ApiResult<HttpResponse> {
     match req.cookie(authority.cookie_name) {
-        Some(mut cookie) =>  {
-            cookie_config(&mut cookie);        
+        Some(mut cookie) => {
+            cookie_config(&mut cookie);
             cookie.make_removal();
             Ok(HttpResponse::build(StatusCode::OK)
                 .cookie(cookie)
                 .json(HashMap::<(), ()>::new()))
         }
-        None => Ok(
-            HttpResponse::Ok()
-                .json(HashMap::<(), ()>::new())
-        )
+        None => Ok(HttpResponse::Ok().json(HashMap::<(), ()>::new())),
     }
 }
 
