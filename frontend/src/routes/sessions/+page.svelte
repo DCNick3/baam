@@ -2,10 +2,13 @@
   import Button from '$lib/Button.svelte';
   import type { Session } from '$lib/session';
   import Bomb from '~icons/baam/bomb';
+  import { api } from '$lib/api';
   import type { PageData } from './$types';
+  import { invalidate } from '$app/navigation';
+
   export let data: PageData;
 
-  let sessions: Array<Session> = data.sessions;
+  $: sessions = data.sessions;
   let selection: Array<number> = [];
 
   $: allSelected = sessions.length === selection.length;
@@ -19,6 +22,19 @@
         selection.push(ses.id);
       });
     }
+  }
+
+  async function batch_delete() {
+    // iterate over selection and delete each session
+    // TODO: add an API for batch deletion
+    await Promise.all(
+      selection.map((id) => {
+        api.sessions.delete({ id });
+      })
+    );
+    selection = [];
+    await invalidate('/api/sessions');
+    console.log('deleted & invalidated');
   }
 </script>
 
@@ -43,7 +59,7 @@
               <Button type="Primary">Export</Button>
             </div>
             <div class="p-3 min-w-max pl-0">
-              <Button type="Danger">Delete</Button>
+              <Button type="Danger" on:click={batch_delete}>Delete</Button>
             </div>
           {:else}
             <div class="p-3 min-w-max">

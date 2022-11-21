@@ -1,5 +1,6 @@
 import { Session } from '$lib/session';
 import { load_with_api } from '$lib/api';
+import type { PageLoad } from './$types';
 
 const month = [
   '0 month',
@@ -31,7 +32,7 @@ function formatSessionTime(sessionTime: Date) {
   }
 }
 
-export const load = load_with_api(async ({ api }) => {
+export const load: PageLoad = load_with_api(async ({ api }) => {
   const list = await api.sessions.list();
   return {
     sessions: list.map(

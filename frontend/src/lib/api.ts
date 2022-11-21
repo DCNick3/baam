@@ -82,7 +82,10 @@ class Fetcher {
         return result_data;
       }
     } else {
-      throw new ApiError(response.status, result_data);
+      const error = new ApiError(response.status, result_data);
+      // TODO: better error handling
+      showError(error);
+      throw error;
     }
   }
 
