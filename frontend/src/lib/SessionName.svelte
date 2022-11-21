@@ -45,5 +45,6 @@
     class="pl-2 border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow min-w-[150px] overflow-auto"
     type="text"
     on:input={handleInput}
+    bind:value={name}
   />
 </div>

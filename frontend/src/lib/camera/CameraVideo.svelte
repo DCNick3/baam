@@ -3,6 +3,7 @@
   import { VideoState } from './VideoState';
   import ViewfinderOverlay from '$lib/camera/ViewfinderOverlay.svelte';
   import { ResizeObserver } from '@juggle/resize-observer';
+  import type { Size } from './Size';
 
   export let stream: MediaStream;
 
@@ -21,8 +22,8 @@
     canvasCtx = canvas.getContext('2d');
   }
 
-  let video_size: { width: number; height: number } | null = null;
-  let wrapper_size: { width: number; height: number } | null = null;
+  let video_size: Size | null = null;
+  let wrapper_size: Size | null = null;
 
   let resize_observer: ResizeObserver = new ResizeObserver(() => {
     if (!wrapper) return;

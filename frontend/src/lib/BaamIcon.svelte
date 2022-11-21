@@ -47,7 +47,7 @@
 
 <Component
   class={'inline ' + $$props.class}
-  {focusable}
+  focusable={focusable.toString()}
   width={real_size}
   height={real_size}
   viewBox="0 0 {box} {box}"

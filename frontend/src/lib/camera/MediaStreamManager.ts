@@ -189,7 +189,7 @@ export class MediaStreamManager {
     throw new Error(`getUserMedia failed after ${repeat} retries`);
   }
 
-  async open_next() {
+  async open_next(): Promise<MediaStream> {
     await this.close();
 
     if (!this.is_supported) {
@@ -244,9 +244,10 @@ export class MediaStreamManager {
       this.#device_list.push_unknown(m.deviceId);
     });
 
+    // TODO: I think this is unreachable code, but I'm not sure...
     if (this.#first_open) {
       this.#first_open = false;
-      return;
+      throw new MediaStreamManagerError(MediaStreamManagerErrorKind.NoCamera);
     }
 
     while (this.#device_list.has_unknown()) {
