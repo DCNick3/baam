@@ -76,6 +76,23 @@ fn calculate_hmac(seed: &[u8], index: u32) -> Result<[u8; HMAC_SIZE]> {
     Ok(result[..HMAC_SIZE].try_into()?)
 }
 
+/// Time subtraction with specified bounds
+fn saturating_sub(
+    a: DateTime<Utc>,
+    b: DateTime<Utc>,
+    lower_bound: Option<chrono::Duration>,
+    upper_bound: Option<chrono::Duration>,
+) -> chrono::Duration {
+    let mut diff = a - b;
+    if let Some(max) = upper_bound {
+        diff = diff.min(max);
+    }
+    if let Some(min) = lower_bound {
+        diff = diff.max(min);
+    }
+    diff
+}
+
 fn validate_challenge(
     challenge: ParsedChallenge,
     submission_time: DateTime<Utc>,
@@ -91,23 +108,25 @@ fn validate_challenge(
         + chrono::Duration::from_std(config.qr_interval * challenge.challenge_index)?;
     let expected_end_time = expected_start_time + chrono::Duration::from_std(config.qr_interval)?;
 
-    fn difference(a: DateTime<Utc>, b: DateTime<Utc>) -> chrono::Duration {
-        if a > b {
-            a - b
-        } else {
-            b - a
-        }
-    }
-
-    // TODO: this is probably not correct
-    let difference_1 = difference(submission_time, expected_start_time);
-    let difference_2 = difference(submission_time, expected_end_time);
-    let difference = difference_1.min(difference_2);
+    let difference_1 = saturating_sub(
+        expected_start_time,
+        submission_time,
+        Some(chrono::Duration::zero()),
+        None,
+    );
+    let difference_2 = saturating_sub(
+        submission_time,
+        expected_end_time,
+        Some(chrono::Duration::zero()),
+        None,
+    );
+    let difference = difference_1.max(difference_2);
 
     if difference > chrono::Duration::from_std(config.jitter_window)? {
         bail!(
-            "Challenge out of time window ({} ms)",
-            difference.num_milliseconds()
+            "Challenge out of time window ({} ms > jitter window, {} ms)",
+            difference.num_milliseconds(),
+            config.jitter_window.as_millis(),
         );
     }
 
@@ -193,14 +212,18 @@ pub fn configure(config: Config) -> impl Fn(&mut ServiceConfig) + Clone {
 
 #[cfg(test)]
 mod test {
-    use crate::api::challenge::{parse_challenge, validate_challenge};
-    use std::ops::Add;
+    use chrono::{DateTime, Utc};
+
+    use crate::db::models::SessionId;
+    use std::ops::{Add, Sub};
     use std::time::Duration;
+
+    use super::*;
 
     #[test]
     fn test_parse_challenge() {
         let data = base64::decode("AAAAAAEC").unwrap();
-        let parsed = super::parse_challenge(&data).unwrap();
+        let parsed = parse_challenge(&data).unwrap();
         assert_eq!(parsed.hmac, [0, 0, 0, 0]);
         assert_eq!(parsed.session_id.0, 1);
         assert_eq!(parsed.challenge_index, 2);
@@ -209,28 +232,150 @@ mod test {
     #[test]
     fn test_parse_encoded_challenge() {
         let data = "PQRETQwE";
-        let parsed = super::parse_encoded_challenge(data).unwrap();
+        let parsed = parse_encoded_challenge(data).unwrap();
         assert_eq!(parsed.hmac, [0x3d, 0x04, 0x44, 0x4d]);
         assert_eq!(parsed.session_id.0, 12);
         assert_eq!(parsed.challenge_index, 4);
     }
 
-    #[test]
-    fn test_validate_challenge() {
+    fn init() -> (Vec<u8>, ParsedChallenge, DateTime<Utc>, Config) {
         let seed = base64::decode("YNxExINfvxmC0q6g").unwrap();
-        let parsed_challenge = parse_challenge(&base64::decode("MIl1tAwE").unwrap()).unwrap();
+        let parsed_challenge = ParsedChallenge {
+            hmac: [48, 137, 117, 180],
+            session_id: SessionId(12),
+            challenge_index: 4,
+        };
+        let start_time = chrono::DateTime::<chrono::Utc>::from_utc(
+            chrono::NaiveDateTime::from_timestamp(1645671600, 0),
+            chrono::Utc,
+        );
+        let config = super::Config {
+            qr_interval: Duration::from_secs(1),
+            jitter_window: Duration::from_millis(300),
+        };
+        (seed, parsed_challenge, start_time, config)
+    }
+
+    #[test]
+    fn test_validate_challenge_valid() {
+        let (seed, parsed_challenge, start_time, config) = init();
+        let jitter_window = chrono::Duration::from_std(config.jitter_window).unwrap();
+        let cases = [
+            // Window start
+            start_time.add(chrono::Duration::seconds(4)),
+            // Window center
+            start_time.add(chrono::Duration::milliseconds(4500)),
+            // Window end
+            start_time.add(chrono::Duration::seconds(5)),
+            // Window start and jitter window
+            start_time.add(chrono::Duration::seconds(4).sub(jitter_window)),
+            // Window end and jitter window
+            start_time.add(chrono::Duration::seconds(5).add(jitter_window)),
+        ];
+        for submission_time in cases {
+            validate_challenge(
+                parsed_challenge,
+                submission_time,
+                super::ChallengeParams {
+                    start_time,
+                    seed: seed.clone(),
+                },
+                &config,
+            )
+            .expect(&format!(
+                "Challenge at timestamp {} should be accepted",
+                submission_time
+            ));
+        }
+    }
+
+    #[test]
+    fn test_validate_challenge_invalid() {
+        let (seed, parsed_challenge, start_time, config) = init();
+
+        // Out-of-bounds submisison times
+
+        // Slightly out of bounds to fail
+        let jitter_window_plus_1 = chrono::Duration::from_std(config.jitter_window).unwrap()
+            + chrono::Duration::milliseconds(1);
+        let cases = [
+            // Window start and jitter window
+            start_time.add(chrono::Duration::seconds(4).sub(jitter_window_plus_1)),
+            // Window end and jitter window
+            start_time.add(chrono::Duration::seconds(5).add(jitter_window_plus_1)),
+            // Overflow/underflow does not crash anything
+            chrono::DateTime::<chrono::Utc>::MIN_UTC,
+            chrono::DateTime::<chrono::Utc>::MAX_UTC,
+        ];
+        for submission_time in cases {
+            validate_challenge(
+                parsed_challenge,
+                submission_time,
+                super::ChallengeParams {
+                    start_time,
+                    seed: seed.clone(),
+                },
+                &config,
+            )
+            .expect_err(&format!(
+                "Challenge at timestamp {} should not be accepted",
+                submission_time
+            ));
+        }
+
+        let submission_time = start_time.add(chrono::Duration::seconds(4));
+
+        // Test if this passes to make sure errors later are caused by the changes made
         validate_challenge(
             parsed_challenge,
-            chrono::Utc::now().add(chrono::Duration::seconds(4)),
+            submission_time,
             super::ChallengeParams {
-                start_time: chrono::Utc::now(),
-                seed,
+                start_time,
+                seed: seed.clone(),
             },
-            &super::Config {
-                qr_interval: Duration::from_secs(1),
-                jitter_window: Duration::from_millis(500),
-            },
+            &config,
         )
-        .unwrap();
+        .expect(&format!(
+            "Challenge {:?} should be accepted",
+            parsed_challenge
+        ));
+
+        // Wrong HMAC
+        let incorrect_challenge = ParsedChallenge {
+            hmac: [48, 137, 117, 181],
+            ..parsed_challenge
+        };
+        validate_challenge(
+            incorrect_challenge,
+            submission_time,
+            super::ChallengeParams {
+                start_time,
+                seed: seed.clone(),
+            },
+            &config,
+        )
+        .expect_err(&format!(
+            "Challenge {:?} should not be accepted",
+            incorrect_challenge
+        ));
+
+        // Wrong index (or HMAC lol)
+        let incorrect_challenge = ParsedChallenge {
+            challenge_index: 3,
+            ..parsed_challenge
+        };
+        validate_challenge(
+            incorrect_challenge,
+            submission_time,
+            super::ChallengeParams {
+                start_time,
+                seed: seed.clone(),
+            },
+            &config,
+        )
+        .expect_err(&format!(
+            "Challenge {:?} should not be accepted",
+            incorrect_challenge
+        ));
     }
 }
