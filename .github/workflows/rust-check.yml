@@ -9,7 +9,7 @@ on:
 
       # magical rust part in frontend ( ͡° ͜ʖ ͡°)
       - frontend/build.rs
-      - frontend/lib.rs
+      - frontend/src/lib.rs
       - frontend/Cargo.toml
 
 name: Rust checks
