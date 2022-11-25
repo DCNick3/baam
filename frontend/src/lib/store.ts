@@ -3,6 +3,10 @@ import type { Writable } from 'svelte/store';
 import { writable, get } from 'svelte/store';
 import type { ApiUser } from './models';
 
+// this allows us to store svelte store thing in local storage
+// it's not used by anything yet though :P
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const val = <T>(key: string, initValue: T): Writable<T> => {
   const store = writable(initValue);
   if (!browser) return store;

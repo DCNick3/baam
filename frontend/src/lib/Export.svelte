@@ -1,6 +1,6 @@
 <script lang="ts">
-  export let sess_id = '';
   export let sess_name = '';
+  // TODO: we probably want to pass session data in here
 </script>
 
 <div class="flex flex-col">

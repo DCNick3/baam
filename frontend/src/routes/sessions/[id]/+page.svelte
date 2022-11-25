@@ -4,7 +4,6 @@
   import SessionFeed from '$lib/SessionFeed.svelte';
   import SessionCodeTimer from '$lib/generate_session_code';
   import { Student } from '$lib/student';
-  import type { Session } from '$lib/models';
 
   import { onDestroy } from 'svelte';
   import { Navigation } from 'swiper';
