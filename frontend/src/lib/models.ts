@@ -21,11 +21,11 @@ export interface ApiSession {
 export type Session = Omit<ApiSession, 'start_time'> & { start_time: Date };
 
 export interface ApiSessionWithMarks extends ApiSession {
-  marks: ApiAttendanceMark[];
+  attendance_marks: ApiAttendanceMark[];
 }
-export type SessionWithMarks = Omit<ApiSessionWithMarks, 'start_time' | 'marks'> & {
+export type SessionWithMarks = Omit<ApiSessionWithMarks, 'start_time' | 'attendance_marks'> & {
   start_time: Date;
-  marks: AttendanceMark[];
+  attendance_marks: AttendanceMark[];
 };
 
 export interface ApiNewSession {
