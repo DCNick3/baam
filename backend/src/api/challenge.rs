@@ -301,6 +301,25 @@ mod test {
                 max: None,
                 d: 13,
             },
+            // Overflow tests
+            SaturatingSubTestCase {
+                // minimal timestamp, otherwise will panic
+                m: -8334632851200,
+                // maximal timestamp, otherwise construction will panic
+                s: 8210298412799,
+                min: Some(-8334632851200),
+                max: None,
+                d: -8334632851200,
+            },
+            SaturatingSubTestCase {
+                // maximal timestamp, otherwise construction will panic
+                m: 8210298412799,
+                // minimal timestamp, otherwise will panic
+                s: -8334632851200,
+                min: None,
+                max: Some(8210298412799),
+                d: 8210298412799,
+            },
         ];
         for SaturatingSubTestCase { m, s, min, max, d } in cases {
             let m_ = chrono::DateTime::<chrono::Utc>::from_utc(
@@ -318,7 +337,7 @@ mod test {
             assert_eq!(
                 result, d_,
                 "{}-{} (min: {:?}, max: {:?}) = {}, not {}",
-                m, s, min, max, result, d
+                m, s, min, max, result.num_seconds(), d
             );
         }
     }
@@ -388,7 +407,7 @@ mod test {
             start_time.add(chrono::Duration::seconds(4).sub(jitter_window_plus_1)),
             // Window end and jitter window
             start_time.add(chrono::Duration::seconds(5).add(jitter_window_plus_1)),
-            // Overflow/underflow does not crash anything
+            // Overflow does not crash anything
             chrono::DateTime::<chrono::Utc>::MIN_UTC,
             chrono::DateTime::<chrono::Utc>::MAX_UTC,
         ];
