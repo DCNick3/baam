@@ -1,4 +1,11 @@
-on: push
+on:
+  push:
+    paths:
+      - .github/workflows/rust-check.yml
+      - backend/**
+      - diesel-tracing/**
+      - Cargo.toml
+      - Cargo.lock
 
 name: Rust checks
 

@@ -1,4 +1,8 @@
-on: push
+on:
+  push:
+    paths:
+      - .github/workflows/frontend.yml
+      - frontend/**
 
 name: frontend
 
