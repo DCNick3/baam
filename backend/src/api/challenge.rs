@@ -335,9 +335,15 @@ mod test {
             let d_ = chrono::Duration::seconds(d);
             let result = saturating_sub(m_, s_, min_, max_);
             assert_eq!(
-                result, d_,
+                result,
+                d_,
                 "{}-{} (min: {:?}, max: {:?}) = {}, not {}",
-                m, s, min, max, result.num_seconds(), d
+                m,
+                s,
+                min,
+                max,
+                result.num_seconds(),
+                d
             );
         }
     }
