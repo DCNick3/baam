@@ -1,6 +1,5 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
-  import type { Session } from '$lib/session';
   import Bomb from '~icons/baam/bomb';
   import { api } from '$lib/api';
   import type { PageData } from './$types';
