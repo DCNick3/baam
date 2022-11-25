@@ -108,10 +108,7 @@ impl Connection for InstrumentedPgConnection {
         let span = tracing::Span::current();
         span.record("db.name", info.current_database.as_str());
         span.record("db.version", info.version.as_str());
-        span.record(
-            "net.peer.ip",
-            format!("{}", info.inet_server_addr).as_str(),
-        );
+        span.record("net.peer.ip", format!("{}", info.inet_server_addr).as_str());
         span.record("net.peer.port", info.inet_server_port);
 
         Ok(InstrumentedPgConnection { inner: conn, info })
