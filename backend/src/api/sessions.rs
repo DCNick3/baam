@@ -32,7 +32,7 @@ async fn create_session(
 
     let mut seed = [0u8; 12];
     OsRng.fill_bytes(&mut seed);
-    let seed = base64::encode(&seed);
+    let seed = base64::encode(seed);
 
     let session = db
         .send(db::CreateSession {
