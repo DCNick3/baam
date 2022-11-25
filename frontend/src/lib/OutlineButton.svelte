@@ -25,7 +25,7 @@
 <button
   on:click
   {disabled}
-  class="{$$props.class} rounded-md w-fit h-fit bg-opacity-0 transition ease-in-out duration-400 border py-2 px-4 {button_style} hover:text-slate-200"
+  class="{$$props.class} duration-400 h-fit w-fit rounded-md border bg-opacity-0 py-2 px-4 transition ease-in-out {button_style} hover:text-slate-200"
 >
   <slot />
 </button>

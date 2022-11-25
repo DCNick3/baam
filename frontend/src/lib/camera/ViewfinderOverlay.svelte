@@ -47,14 +47,14 @@
   }
 </script>
 
-<div class="grid absolute inset-0" bind:this={overlay}>
+<div class="absolute inset-0 grid" bind:this={overlay}>
   <!-- row 1 -->
   <div class="bg-mask" />
   <div class="bg-mask" />
   <div class="bg-mask" />
   <!-- row 2 -->
   <div class="bg-mask" />
-  <div class="bg-transparent border border-white" />
+  <div class="border border-white bg-transparent" />
   <div class="bg-mask" />
   <!-- row 3 -->
   <div class="bg-mask" />

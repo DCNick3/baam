@@ -10,7 +10,7 @@
   });
 </script>
 
-<div class="w-full flex-grow qr-parent min-h-0">
+<div class="qr-parent min-h-0 w-full flex-grow">
   {@html qr_svg}
   <!-- Appease the linter by using this -->
   <svg class="hidden" />

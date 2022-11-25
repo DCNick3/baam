@@ -6,13 +6,13 @@
   import BaamBlog from '$lib/BaamBlog.svelte';
 </script>
 
-<div class="flex flex-col h-full w-full overflow-y-scroll">
-  <div class="flex-grow flex flex-col">
-    <div class="w-full flex flex-row justify-center">
+<div class="flex h-full w-full flex-col overflow-y-scroll">
+  <div class="flex flex-grow flex-col">
+    <div class="flex w-full flex-row justify-center">
       <div class="flex flex-col lg:flex-row lg:justify-center">
         <div
-          class="p-5 flex flex-col text-slate-800
-                  -ml-10 md:ml-0"
+          class="-ml-10 flex flex-col p-5
+                  text-slate-800 md:ml-0"
         >
           <!-- reserve some space !-->
           <div class="h-5 md:h-20" />
@@ -23,8 +23,8 @@
         </div>
         <div class="lg:w-20" />
         <div
-          class="p-5 flex flex-col text-slate-800
-                  -ml-10 md:ml-0"
+          class="-ml-10 flex flex-col p-5
+                  text-slate-800 md:ml-0"
         >
           <!-- reserve some space !-->
           <div class="lg:h-20" />
