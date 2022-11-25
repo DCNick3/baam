@@ -4,7 +4,7 @@
   import Navbar from '$lib/Navbar.svelte';
 </script>
 
-<div class="grid grid-rows-[auto_minmax(0,_1fr)] grid-cols-1 w-full h-full">
+<div class="grid h-full w-full grid-cols-1 grid-rows-[auto_minmax(0,_1fr)]">
   <Navbar />
   <div class="contents">
     <slot />

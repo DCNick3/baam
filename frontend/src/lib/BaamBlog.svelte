@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 
-<div class="baam-blog flex-grow text-justify m-10">
+<div class="baam-blog m-10 flex-grow text-justify">
   <!--<h2 class="post-list-heading">Latest update:</h2>--><span class="post-meta">Aug 9, 2021</span>
   <h3>
     <a

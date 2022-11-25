@@ -45,11 +45,11 @@
 </script>
 
 <div
-  class="{$$props.class} {style_classes} flex flex-row border-[1px] transition-all ease-out mb-4 mt-2 min-w-[150px]"
+  class="{$$props.class} {style_classes} mb-4 mt-2 flex min-w-[150px] flex-row border-[1px] transition-all ease-out"
 >
-  <div class="p-2 bg-gray-200 text-gray-800 min-w-max hidden sm:block">Session name</div>
+  <div class="hidden min-w-max bg-gray-200 p-2 text-gray-800 sm:block">Session name</div>
   <input
-    class="pl-2 sm:border-l-[1px] border-gray-300 text-gray-800 focus:outline-none flex-grow min-w-[150px] overflow-auto"
+    class="min-w-[150px] flex-grow overflow-auto border-gray-300 pl-2 text-gray-800 focus:outline-none sm:border-l-[1px]"
     type="text"
     on:focus={handleFocus}
     on:input={handleInput}

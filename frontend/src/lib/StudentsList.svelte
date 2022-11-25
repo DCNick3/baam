@@ -25,16 +25,16 @@
 </script>
 
 <div
-  class="{$$props.class} flex ml-2 mr-2 flex-col border-[1px] border-gray-300 rounded-t-md rounded-b-md max-h-full min-h-[140px] min-w-[150px]"
+  class="{$$props.class} ml-2 mr-2 flex max-h-full min-h-[140px] min-w-[150px] flex-col rounded-t-md rounded-b-md border-[1px] border-gray-300"
 >
-  <ul class="flex-grow-0 flex-shrink overflow-y-scroll" bind:this={list}>
+  <ul class="flex-shrink flex-grow-0 overflow-y-scroll" bind:this={list}>
     {#each students as student, i}
-      <li class="border-t-[1px] first:border-t-0 last:border-b-[1px] border-gray-300 min-w-[150px]">
+      <li class="min-w-[150px] border-t-[1px] border-gray-300 first:border-t-0 last:border-b-[1px]">
         <div class="flex">
-          <div class="p-1 bg-gray-200 text-gray-800 min-w-[40px] text-center">
+          <div class="min-w-[40px] bg-gray-200 p-1 text-center text-gray-800">
             {i + 1}
           </div>
-          <div class="p-1 pl-2 bg-white">
+          <div class="bg-white p-1 pl-2">
             <div class="text-gray-800">{student.email}</div>
           </div>
         </div>
@@ -42,10 +42,10 @@
     {/each}
   </ul>
   <div class="flex-grow" />
-  <div class="flex-grow-0 flex-shrink flex flex-row border-t-[1px] rounded-bl-md">
-    <div class="p-2 bg-gray-200 text-gray-700 min-w-max">Add student</div>
+  <div class="flex flex-shrink flex-grow-0 flex-row rounded-bl-md border-t-[1px]">
+    <div class="min-w-max bg-gray-200 p-2 text-gray-700">Add student</div>
     <input
-      class="pl-2 focus:outline-none text-gray-800 flex-grow min-w-[150px] overflow-auto"
+      class="min-w-[150px] flex-grow overflow-auto pl-2 text-gray-800 focus:outline-none"
       type="text"
       bind:value={student_email}
       on:keydown={on_key_down}
