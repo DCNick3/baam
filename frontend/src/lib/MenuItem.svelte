@@ -6,7 +6,7 @@
 </script>
 
 <a
-  class="w-fit mr-2 ml-10 mt-4 text-3xl transition-colors hover-underline hover:text-slate-600"
+  class="hover-underline mr-2 ml-10 mt-4 w-fit text-3xl transition-colors hover:text-slate-600"
   {href}
 >
   <BaamIcon name={icon} size="5xl" class="mr-5" />

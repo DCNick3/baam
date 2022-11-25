@@ -120,11 +120,11 @@
 </script>
 
 <!-- margin doesn't work for some reason, so use padding -->
-<div class="w-full h-full" bind:this={wrapper}>
+<div class="h-full w-full" bind:this={wrapper}>
   <div class="relative w-fit" bind:this={container}>
     <canvas class="hidden" bind:this={canvas} />
     <!-- svelte-ignore a11y-media-has-caption -->
-    <video class="w-full h-full" bind:this={video} autoplay playsinline muted />
+    <video class="h-full w-full" bind:this={video} autoplay playsinline muted />
     <ViewfinderOverlay {video_size} {container} />
   </div>
 </div>

@@ -71,24 +71,24 @@
     initialSlide={2}
   >
     <SwiperSlide>
-      <div class="flex flex-grow px-3 sm:px-20 pt-2 pb-10 w-full h-full max-h-full overflow-hidden">
+      <div class="flex h-full max-h-full w-full flex-grow overflow-hidden px-3 pt-2 pb-10 sm:px-20">
         <SessionFeed bind:sess_name bind:students />
       </div>
     </SwiperSlide>
     <SwiperSlide>
-      <div class="flex flex-col h-full">
+      <div class="flex h-full flex-col">
         {#if qr_enabled}
-          <div class="w-full px-5 pt-4 mb-3">
+          <div class="mb-3 w-full px-5 pt-4">
             <Button class="w-[100%]" type="Primary" on:click={flipState}
               >Finish showing QR code</Button
             >
           </div>
           <!-- !!!DO NOT ADD ANY MORE WRAPPERS. It breaks vertical QR code resizing! -->
-          <div class="w-full contents mb-10">
+          <div class="mb-10 contents w-full">
             <QRcode qr_data={qr_code_data} />
           </div>
         {:else}
-          <div class="w-full px-5 pt-4 mb-3">
+          <div class="mb-3 w-full px-5 pt-4">
             <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
           </div>
           <div class="px-5">
@@ -101,22 +101,22 @@
 </div>
 
 <div
-  class="hidden lg:grid grid-cols-[minmax(min-content,_43em)_minmax(30em,_1fr)] h-full max-h-full "
+  class="hidden h-full max-h-full grid-cols-[minmax(min-content,_43em)_minmax(30em,_1fr)] lg:grid "
 >
-  <div class="flex flex-grow  pl-5 pt-2 pb-10 pr-3 h-full max-h-full overflow-hidden">
+  <div class="flex h-full  max-h-full flex-grow overflow-hidden pl-5 pt-2 pb-10 pr-3">
     <SessionFeed bind:sess_name bind:students />
   </div>
-  <div class="flex flex-col h-100% overflow-hidden">
+  <div class="h-100% flex flex-col overflow-hidden">
     {#if qr_enabled}
-      <div class="w-full px-5 pt-4 mb-3">
+      <div class="mb-3 w-full px-5 pt-4">
         <Button class="w-[100%]" type="Primary" on:click={flipState}>Finish showing QR code</Button>
       </div>
       <!-- !!!DO NOT ADD ANY MORE WRAPPERS. It breaks vertical QR code resizing! -->
-      <div class="w-full contents mb-10">
+      <div class="mb-10 contents w-full">
         <QRcode qr_data={qr_code_data} />
       </div>
     {:else}
-      <div class="w-full px-5 pt-4 mb-3">
+      <div class="mb-3 w-full px-5 pt-4">
         <Button class="w-[100%]" type="Secondary" on:click={flipState}>Show QR code</Button>
       </div>
       <div class="px-5">

@@ -3,11 +3,11 @@
   import NavLogin from './NavLogin.svelte';
 </script>
 
-<div class="flex selection:flex-row border-b shadow-md border-slate-300 z-10">
-  <div class="flex flex-row w-fit">
+<div class="z-10 flex border-b border-slate-300 shadow-md selection:flex-row">
+  <div class="flex w-fit flex-row">
     <a
       href="/"
-      class="m-2 text-2xl lg:text-3xl text-slate-900 hover:text-slate-700 mt-4 ml-3 mr-0 lg:mr-4"
+      class="m-2 mt-4 ml-3 mr-0 text-2xl text-slate-900 hover:text-slate-700 lg:mr-4 lg:text-3xl"
     >
       baam
     </a>
