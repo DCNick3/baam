@@ -238,7 +238,92 @@ mod test {
         assert_eq!(parsed.challenge_index, 4);
     }
 
-    fn init() -> (Vec<u8>, ParsedChallenge, DateTime<Utc>, Config) {
+    #[test]
+    fn test_calculate_hmac() {
+        let seed = base64::decode("YNxExINfvxmC0q6g").unwrap();
+        let hmac = [48, 137, 117, 180];
+        let challenge_index = 4;
+
+        assert_eq!(calculate_hmac(&seed, challenge_index).unwrap(), hmac);
+    }
+
+    #[test]
+    fn test_saturating_sub() {
+        /// `m`-`s` (bounds: `min`, `max`) = `d`
+        struct SaturatingSubTestCase {
+            m: i64,
+            s: i64,
+            min: Option<i64>,
+            max: Option<i64>,
+            d: i64,
+        }
+
+        let cases = [
+            SaturatingSubTestCase {
+                m: 10,
+                s: 3,
+                min: Some(0),
+                max: Some(10),
+                d: 7,
+            },
+            SaturatingSubTestCase {
+                m: 10,
+                s: 11,
+                min: Some(0),
+                max: Some(10),
+                d: 0,
+            },
+            SaturatingSubTestCase {
+                m: 10,
+                s: 12,
+                min: Some(-1),
+                max: Some(10),
+                d: -1,
+            },
+            SaturatingSubTestCase {
+                m: 10,
+                s: 12,
+                min: None,
+                max: Some(10),
+                d: -2,
+            },
+            SaturatingSubTestCase {
+                m: 10,
+                s: -3,
+                min: Some(0),
+                max: Some(11),
+                d: 11,
+            },
+            SaturatingSubTestCase {
+                m: 10,
+                s: -3,
+                min: None,
+                max: None,
+                d: 13,
+            },
+        ];
+        for SaturatingSubTestCase { m, s, min, max, d } in cases {
+            let m_ = chrono::DateTime::<chrono::Utc>::from_utc(
+                chrono::NaiveDateTime::from_timestamp(m, 0),
+                chrono::Utc,
+            );
+            let s_ = chrono::DateTime::<chrono::Utc>::from_utc(
+                chrono::NaiveDateTime::from_timestamp(s, 0),
+                chrono::Utc,
+            );
+            let min_ = min.map(|a| chrono::Duration::seconds(a));
+            let max_ = max.map(|a| chrono::Duration::seconds(a));
+            let d_ = chrono::Duration::seconds(d);
+            let result = saturating_sub(m_, s_, min_, max_);
+            assert_eq!(
+                result, d_,
+                "{}-{} (min: {:?}, max: {:?}) = {}, not {}",
+                m, s, min, max, result, d
+            );
+        }
+    }
+
+    fn init_validate() -> (Vec<u8>, ParsedChallenge, DateTime<Utc>, Config) {
         let seed = base64::decode("YNxExINfvxmC0q6g").unwrap();
         let parsed_challenge = ParsedChallenge {
             hmac: [48, 137, 117, 180],
@@ -258,7 +343,7 @@ mod test {
 
     #[test]
     fn test_validate_challenge_valid() {
-        let (seed, parsed_challenge, start_time, config) = init();
+        let (seed, parsed_challenge, start_time, config) = init_validate();
         let jitter_window = chrono::Duration::from_std(config.jitter_window).unwrap();
         let cases = [
             // Window start
@@ -291,7 +376,7 @@ mod test {
 
     #[test]
     fn test_validate_challenge_invalid() {
-        let (seed, parsed_challenge, start_time, config) = init();
+        let (seed, parsed_challenge, start_time, config) = init_validate();
 
         // Out-of-bounds submisison times
 
