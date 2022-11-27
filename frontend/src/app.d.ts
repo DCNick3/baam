@@ -6,6 +6,7 @@ declare namespace App {
     session_cookie?: string;
   }
   // interface PageData {}
+  // interface Error {}
   // interface Platform {}
 }
 

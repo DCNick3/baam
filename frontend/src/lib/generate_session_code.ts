@@ -91,28 +91,26 @@ export default class SessionCodeTimer {
     return WordArray.create(word_array, bytes.length);
   }
 
-  getSessionCode() {
-    this.counter = this.counter + 1;
-    const index_encoded = this.encodeNumberToWordArray(this.counter);
-    let code = hmacSHA1(index_encoded, this.secret);
-    // console.log(
-    //   'key = ',
-    //   this.secret.toString(CryptoJS.enc.Hex),
-    //   'counter =',
-    //   this.counter,
-    //   'index_encoded =',
-    //   index_encoded.toString(CryptoJS.enc.Hex),
-    //   'HMAC',
-    //   code.toString(CryptoJS.enc.Hex)
-    // );
+  generateSessionCode(sess_id: number, counter: number, secret: WordArray): string {
+    const index_encoded = this.encodeNumberToWordArray(counter);
+    let code = hmacSHA1(index_encoded, secret);
     code = truncate(code, this.bytes_to_slice);
-    code = code.concat(this.efficientEncodeToWordArray(this.sess_id));
-    code = code.concat(this.efficientEncodeToWordArray(this.counter));
+    code = code.concat(this.efficientEncodeToWordArray(sess_id));
+    code = code.concat(this.efficientEncodeToWordArray(counter));
     let encoded_code = code.toString(CryptoJS.enc.Base64);
     // Make base64 urlsafe
     encoded_code = encoded_code.replace('+', '-');
     encoded_code = encoded_code.replace('/', '_');
     encoded_code = encoded_code.replace('=', '');
+
+    return encoded_code;
+  }
+
+  getSessionCode() {
+    this.counter = this.counter + 1;
+
+    const encoded_code = this.generateSessionCode(this.sess_id, this.counter, this.secret);
+
     this.callback(encoded_code);
   }
 
