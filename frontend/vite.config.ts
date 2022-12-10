@@ -44,6 +44,9 @@ const config: UserConfig = {
   },
   build: {
     sourcemap: true
+  },
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}']
   }
 };
 export default config;

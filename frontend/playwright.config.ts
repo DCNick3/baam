@@ -9,7 +9,8 @@ const config: PlaywrightTestConfig = {
   use: {
     baseURL: 'https://localhost:4173/',
     ignoreHTTPSErrors: true
-  }
+  },
+  testMatch: 'tests/**/.*(test|spec).(js|ts)'
 };
 
 export default config;
