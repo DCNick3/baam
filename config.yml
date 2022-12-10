@@ -3,3 +3,6 @@ server: {}
 challenge:
   qr_interval: "1s"
   jitter_window: "500ms"
+sentry_tunnel:
+  sentry_hostname: "o4504305014996992.ingest.sentry.io"
+  sentry_project_id: "4504305021222912"

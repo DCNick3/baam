@@ -467,6 +467,7 @@ dependencies = [
  "actix-http",
  "actix-web",
  "anyhow",
+ "awc",
  "baam-frontend",
  "base64",
  "chrono",

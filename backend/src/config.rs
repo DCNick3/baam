@@ -7,6 +7,7 @@ pub struct Config {
     pub frontend: Frontend,
     pub server: Server,
     pub challenge: Challenge,
+    pub sentry_tunnel: Option<Sentry>,
 }
 
 impl Config {
@@ -38,3 +39,4 @@ pub struct Server {
 }
 
 pub type Challenge = crate::api::ChallengeConfig;
+pub type Sentry = crate::sentry_tunnel::Config;

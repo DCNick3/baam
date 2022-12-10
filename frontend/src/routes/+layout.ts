@@ -12,7 +12,8 @@ const sentry_options = {
   environment: import.meta.env.MODE,
   integrations: [new BrowserTracing({})],
   tracesSampleRate: 1.0,
-  release: __APP_VERSION__
+  release: __APP_VERSION__,
+  tunnel: '/api/tunnel'
 };
 
 console.log(

@@ -16,6 +16,7 @@ use actix::SyncArbiter;
 use actix_web::middleware::ErrorHandlers;
 use actix_web::{web, App, HttpServer};
 use anyhow::{Context, Result};
+use api::sentry_tunnel;
 use opentelemetry::sdk::resource::{EnvResourceDetector, SdkProvidedResourceDetector};
 use opentelemetry::sdk::{trace as sdktrace, Resource};
 use opentelemetry_otlp::{HasExportConfig, WithExportConfig};

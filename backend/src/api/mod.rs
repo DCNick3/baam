@@ -2,6 +2,7 @@ pub mod auth;
 mod challenge;
 pub mod error;
 pub mod models;
+pub mod sentry_tunnel;
 mod sessions;
 mod sso;
 
@@ -127,6 +128,8 @@ pub fn configure(config: Config, keys: AuthKeys) -> Result<impl Fn(&mut ServiceC
             .service(me)
             // challenge
             .configure(challenge::configure(config.challenge.clone()))
+            // sentry tunnel
+            .configure(sentry_tunnel::configure(config.sentry_tunnel.clone()))
             .configure(auth.clone())
             .default_service(web::route().to(not_found));
     })
