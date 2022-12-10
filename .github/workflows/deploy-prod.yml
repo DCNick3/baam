@@ -74,6 +74,10 @@ jobs:
 
       # tell sentry we've got a new release
       - uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: dcnick3-services
+          SENTRY_PROJECT: baam
         with:
           environment: 'production'
 
