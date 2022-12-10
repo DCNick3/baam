@@ -2,7 +2,7 @@
   import Sessionname from './SessionName.svelte';
   import StudentsList from './StudentsList.svelte';
   import OutlineButton from '$lib/OutlineButton.svelte';
-  import type { Student } from '$lib/API/student.js';
+  import type { Student } from '$lib/API/student';
 
   export let students: Array<Student>;
   export let sess_name = '';
