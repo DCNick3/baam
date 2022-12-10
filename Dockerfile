@@ -51,6 +51,12 @@ COPY --from=planner /volume/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
 RUN \
     cargo chef cook --profile ship --target x86_64-unknown-linux-musl --recipe-path recipe.json
+
+COPY frontend frontend
+# Install frontend deps
+# TODO: this may be done in parallel prolly
+RUN cd frontend && yarn install --frozen-lockfile
+
 # Build application
 COPY . .
 RUN \
