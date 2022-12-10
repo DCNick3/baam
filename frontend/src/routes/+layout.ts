@@ -1,6 +1,7 @@
 import '../app.css';
 
 import * as Sentry from '@sentry/svelte';
+import * as SentryBrowser from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
 
 import * as store from '$lib/store';
@@ -10,9 +11,19 @@ const sentry_options = {
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
   integrations: [new BrowserTracing({})],
-  tracesSampleRate: 1.0
+  tracesSampleRate: 1.0,
+  release: __APP_VERSION__
 };
-console.log('Initializing Sentry with options', sentry_options);
+
+console.log(
+  `Loading %cbaam%c 🚀 %c${__APP_VERSION__}%c 🔥 in %c${import.meta.env.MODE}%c 🦀 mode`,
+  'font-weight: bold;',
+  '',
+  'color: lime; ',
+  '',
+  'color: blue;',
+  ''
+);
 // setup sentry
 Sentry.init(sentry_options);
 
@@ -22,6 +33,9 @@ export const load = load_with_api(async ({ api }) => {
   while (true) {
     try {
       const user = await api.me();
+      SentryBrowser.setUser({
+        username: user.username
+      });
       store.user.set(user);
       return {
         user

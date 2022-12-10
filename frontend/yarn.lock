@@ -138,7 +138,7 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.21.tgz"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@sentry/browser@7.24.2":
+"@sentry/browser@7.24.2", "@sentry/browser@^7.24.2":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-7.24.2.tgz#1e514448cd07ff7da78d02797149ecc1922ffcc2"
   integrity sha512-X6NbQT0Dp+h54j73TPLgWf3yyLyTZGJI5WQSGEsNIroqhVzD3UF8M+E+3roYpSJDDyYdfuM+WBme+MYkmeqHIw==
@@ -585,6 +585,11 @@ concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
+
+console-log-colors@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/console-log-colors/-/console-log-colors-0.3.3.tgz#d1d22c1e919789b6f4ef36779bb415916b1bed5c"
+  integrity sha512-B4FfSlK/w2GFKZKnIEuK+KFuN4JLr4mqLXSpgSgvebCdXk4HUi+slxX35irN+pVPMKKy3zn+f4jWFUyvUV1YMw==
 
 cookie@^0.5.0:
   version "0.5.0"
