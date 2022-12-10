@@ -1,4 +1,4 @@
-import { load_with_api } from '$lib/api';
+import { load_with_api } from '$lib/API/api';
 import type { PageLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 

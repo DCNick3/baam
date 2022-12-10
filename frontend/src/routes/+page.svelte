@@ -1,9 +1,9 @@
 <script lang="ts">
-  import MenuHeader from '../lib/MenuHeader.svelte';
+  import MenuHeader from '../lib/Menu/MenuHeader.svelte';
 
-  import MenuItem from '../lib/MenuItem.svelte';
+  import MenuItem from '../lib/Menu/MenuItem.svelte';
 
-  import BaamBlog from '$lib/BaamBlog.svelte';
+  import BaamBlog from '$lib/Blog/BaamBlog.svelte';
 </script>
 
 <div class="flex h-full w-full flex-col overflow-y-scroll">

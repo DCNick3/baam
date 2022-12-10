@@ -1,4 +1,4 @@
-import PreciseTimer from '$lib/precise_timer';
+import PreciseTimer from './precise_timer';
 import { generateSessionCode } from './session_code_encode';
 
 export default class SessionCodeTimer {

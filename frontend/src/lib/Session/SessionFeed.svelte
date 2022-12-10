@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Sessionname from '$lib/SessionName.svelte';
-  import StudentsList from '$lib/StudentsList.svelte';
+  import Sessionname from './SessionName.svelte';
+  import StudentsList from './StudentsList.svelte';
   import OutlineButton from '$lib/OutlineButton.svelte';
-  import type { Student } from '$lib/student.js';
+  import type { Student } from '$lib/API/student.js';
 
   export let students: Array<Student>;
   export let sess_name = '';

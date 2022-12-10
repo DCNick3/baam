@@ -1,5 +1,5 @@
-import { Session } from '$lib/session';
-import { load_with_api } from '$lib/api';
+import { Session } from '$lib/QRcode/session.js';
+import { load_with_api } from '$lib/API/api';
 import type { PageLoad } from './$types';
 
 const month = [

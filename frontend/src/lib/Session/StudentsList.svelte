@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Student } from '$lib/student';
-  import Button from './Button.svelte';
+  import { Student } from '$lib/API/student';
+  import Button from '$lib/Button.svelte';
   import { afterUpdate } from 'svelte';
   export let students: Array<Student> = [];
   let list: HTMLElement;

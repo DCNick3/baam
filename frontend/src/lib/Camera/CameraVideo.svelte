@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { VideoState } from './VideoState';
-  import ViewfinderOverlay from '$lib/camera/ViewfinderOverlay.svelte';
+  import ViewfinderOverlay from '$lib/Camera/ViewfinderOverlay.svelte';
   import { ResizeObserver } from '@juggle/resize-observer';
   import type { Size } from './Size';
 

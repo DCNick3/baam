@@ -4,8 +4,8 @@ import * as Sentry from '@sentry/svelte';
 import * as SentryBrowser from '@sentry/browser';
 import { BrowserTracing } from '@sentry/tracing';
 
-import * as store from '$lib/store';
-import { ApiError, load_with_api } from '$lib/api';
+import * as store from '$lib/API/store';
+import { ApiError, load_with_api } from '$lib/API/api';
 
 const sentry_options = {
   dsn: import.meta.env.VITE_SENTRY_DSN,
