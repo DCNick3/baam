@@ -40,6 +40,7 @@ jobs:
       - name: 'Build container'
         uses: docker/build-push-action@v3
         with:
+          context: .
           push: true
           tags: 'ghcr.io/dcnick3/baam:ref-${{ github.sha }}'
           cache-from: type=registry,ref=ghcr.io/dcnick3/baam:buildcache
