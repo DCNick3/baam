@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
   import Bomb from '~icons/baam/bomb';
-  import { api } from '$lib/api';
+  import { api } from '$lib/API/api';
   import type { PageData } from './$types';
   import { invalidate } from '$app/navigation';
 

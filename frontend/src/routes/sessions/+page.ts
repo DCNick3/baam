@@ -1,5 +1,5 @@
-import { Session } from '$lib/session';
-import { load_with_api } from '$lib/api';
+import { Session } from '$lib/API/session';
+import { load_with_api } from '$lib/API/api';
 import type { PageLoad } from './$types';
 
 const month = [

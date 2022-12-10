@@ -3,7 +3,7 @@
   export let link: string;
   export let icon: string;
 
-  import BaamIcon from './BaamIcon.svelte';
+  import BaamIcon from '$lib/BaamIcon.svelte';
 </script>
 
 <a

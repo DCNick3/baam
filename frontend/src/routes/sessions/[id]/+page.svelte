@@ -1,9 +1,9 @@
 <script lang="ts">
   import Button from '$lib/Button.svelte';
-  import QRcode from '$lib/QRcode.svelte';
-  import SessionFeed from '$lib/SessionFeed.svelte';
-  import SessionCodeTimer from '$lib/generate_session_code';
-  import { Student } from '$lib/student';
+  import QRcode from '$lib/QRcode/QRcode.svelte';
+  import SessionFeed from '$lib/Session/SessionFeed.svelte';
+  import SessionCodeTimer from '$lib/QRcode/generate_session_code';
+  import { Student } from '$lib/API/student';
 
   import { onDestroy } from 'svelte';
   import { Navigation } from 'swiper';
@@ -14,7 +14,7 @@
   import 'swiper/css/navigation';
   import 'swiper/css/pagination';
   import 'swiper/css/scrollbar';
-  import Export from '$lib/Export.svelte';
+  import Export from '$lib/Export/Export.svelte';
 
   let students: Array<Student> = [];
   students[0] = new Student('', 'n.strygin@innopolis.university');

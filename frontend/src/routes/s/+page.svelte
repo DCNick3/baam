@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CameraViewfinder from '$lib/camera/Camera.svelte';
+  import CameraViewfinder from '$lib/Camera/Camera.svelte';
 </script>
 
 <CameraViewfinder />

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import OutlineButton from './OutlineButton.svelte';
-  import { user } from './store';
+  import OutlineButton from '$lib/OutlineButton.svelte';
+  import { user } from '$lib/API/store';
 </script>
 
 <div class="flex w-fit flex-col">
