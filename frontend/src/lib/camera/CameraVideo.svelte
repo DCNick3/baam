@@ -53,13 +53,10 @@
       const ch = wrapper_size.height / video_size.height;
       let scale = Math.min(cw, ch);
 
-      console.log('scale', scale);
-
       // do not scale up
       if (scale > 1) scale = 1;
       const pad_x = wrapper_size.width - video_size.width * scale;
       const pad_y = wrapper_size.height - video_size.height * scale;
-      console.log('pad', pad_x / 2, pad_y / 2);
 
       wrapper.style.paddingTop = wrapper.style.paddingBottom = `${pad_y / 2}px`;
       wrapper.style.paddingLeft = wrapper.style.paddingRight = `${pad_x / 2}px`;

@@ -6,13 +6,15 @@ import { BrowserTracing } from '@sentry/tracing';
 import * as store from '$lib/store';
 import { ApiError, load_with_api } from '$lib/api';
 
-// setup sentry
-Sentry.init({
+const sentry_options = {
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
   integrations: [new BrowserTracing({})],
   tracesSampleRate: 1.0
-});
+};
+console.log('Initializing Sentry with options', sentry_options);
+// setup sentry
+Sentry.init(sentry_options);
 
 export const load = load_with_api(async ({ api }) => {
   // MOCK: make sure the user is logged in
