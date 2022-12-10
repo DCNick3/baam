@@ -37,6 +37,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/checkout@v1
+
       - name: 'Build container'
         uses: docker/build-push-action@v3
         with:
