@@ -21,6 +21,9 @@ const config: UserConfig = {
     proxy: {
       '/api': BACKEND_URL
     }
+  },
+  build: {
+    sourcemap: true
   }
 };
 export default config;

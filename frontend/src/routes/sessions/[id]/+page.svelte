@@ -48,7 +48,7 @@
   }
   let qr_code_data = '';
   function construct_qr_data(session_code: string) {
-    console.log(session_code);
+    // console.log(session_code);
     qr_code_data = 'https://baam.duckdns.com/s#' + session_code;
   }
   let sess_time = new SessionCodeTimer('YNxExINfvxmC0q6g', 12, new Date(), 1000, construct_qr_data);
