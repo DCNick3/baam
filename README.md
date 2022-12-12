@@ -15,7 +15,7 @@
   - `openssl-devel` and `postgresql-devel` on Fedora
   - `openssl` and `postgresql` on macOS (via [brew](https://brew.sh/))
 - npm, nodejs and yarn installed.
-  - For now, nodejs v16 is recommended
+  - For now, nodejs v16 is working, newer versions appear to have problems
 - docker installed for running the database.
 
 ### Building
